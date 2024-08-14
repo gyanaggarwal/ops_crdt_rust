@@ -11,6 +11,7 @@ pub enum VectorClockError {
     EmptyNodeList,
     NodeNotFound,
     NonCompatibleVC,
+    InconsistentInputTRBC(NodeType, Vec<NodeType>),
     #[default]
     UnexpectedError
 }
