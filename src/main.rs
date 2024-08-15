@@ -5,6 +5,7 @@ use ops_crdt_rust::NodeType;
 fn main() {
     let node_list = create_node_list();
     let vc000 = vector_clock::VectorClock::new(node_list.clone()).unwrap();
+ 
     let node0 = &0;
     let node1 = &1;
     let mut cc100 = vc000.clone();
@@ -34,9 +35,12 @@ fn main() {
     println!("cmp11 {:?} cmp12 {:?} cmp21 {:?} cmp13 {:?} cmp31 {:?}", 
              cmp11, cmp12, cmp21, cmp13, cmp31);
 
-    let trcb1 = trcb::TRCBData::new(1, node_list.clone()).unwrap();
+    let mut trcb1 = trcb::TRCBData::new(1, node_list.clone()).unwrap();
+    println!("trcb1 {:?}", trcb1);
 
-    println!("trcb {:?}", trcb1);
+    let vc010 = trcb1.next_vc().unwrap();
+    println!("vc010 {:?}", vc010);
+    println!("trcb2 {:?}", trcb1);
 
 }
 

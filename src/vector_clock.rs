@@ -57,6 +57,12 @@ impl VectorClock {
         }
     }
 
+    pub fn is_next_vc(&self, node: &NodeType, peer_vc: &VectorClock) -> Result<bool, VectorClockError> {
+        let nlc = self.vcmap.get(node).ok_or(VectorClockError::NodeNotFound)?;
+        let plc = peer_vc.vcmap.get(node).ok_or(VectorClockError::NodeNotFound)?;
+        Ok(*nlc+INC_LC == *plc)
+    }
+
     pub fn cmp_vc(&self, other: &VectorClock) -> Result<VCOrdering, VectorClockError> {
         if self.len() != other.len() {
             return Err(VectorClockError::NonCompatibleVC);
@@ -64,12 +70,9 @@ impl VectorClock {
         
         let mut vcords = VCOrdering::VCEQ;
         for (node, lc1) in self.vcmap.iter() {
-            match other.vcmap.get(node) {
-                Some(lc2) => {let vcordo = cmp_lc(lc1, lc2);
-                                        vcords = vc_order(vcords, vcordo)},
-
-                None => return Err(VectorClockError::NonCompatibleVC)
-            }
+            let lc2 = other.vcmap.get(node).ok_or(VectorClockError::NonCompatibleVC)?;
+            let vcordo = cmp_lc(lc1, lc2);
+            vcords = vc_order(vcords, vcordo);
         }
 
         Ok(vcords)

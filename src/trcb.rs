@@ -1,12 +1,6 @@
-// struct
-// next_cd
-// replace
-// causally_stable
-// new_causally_stable
-
 use std::collections::HashMap;
-use crate::NodeType;
-use crate::vector_clock::{VectorClock, VectorClockError};
+use crate::{LCType, NodeType};
+use crate::vector_clock::{VectorClock, VectorClockError, VCOrdering};
 
 #[derive(Debug)]
 pub struct TRCBData {
@@ -40,5 +34,45 @@ impl TRCBData {
             new_causally_stable_vc: false,
             node_trcb
         })
+    }
+
+    pub fn next_vc(&mut self) -> Result<VectorClock, VectorClockError> {
+        self.node_vector_clock.next_vc(&self.node)?;
+        Ok(self.node_vector_clock.clone())
+    }
+
+    pub fn add_peer_vc(&mut self, peer_node: NodeType, peer_vc: VectorClock) -> Result<(), VectorClockError> {
+        let peer_vc_status = self.node_vector_clock.is_next_vc(&peer_node, &peer_vc)?;
+
+        if peer_vc_status {
+            self.node_vector_clock.next_vc(&peer_node)?;
+            self.node_trcb.insert(peer_node, peer_vc);
+        }
+    
+        Ok(())
+    }
+
+    pub fn causally_stable(&mut self) -> Result<(), VectorClockError> {
+        let mut cs_map: HashMap<NodeType, LCType> = HashMap::new();
+
+        for (nnode, nlc) in self.node_vector_clock.vcmap.iter() {
+            let mut mlc = nlc;
+            for (_, pvc) in &self.node_trcb {
+                match pvc.vcmap.get(nnode) {
+                    Some(plc) => if plc < mlc {mlc = plc},
+                    None => return Err(VectorClockError::UnexpectedError)
+                }
+            }
+            cs_map.insert(*nnode, *mlc);
+        };
+
+        let cs_vc = VectorClock{vcmap: cs_map};
+
+        if cs_vc.cmp_vc(&self.node_causally_stable_vc)? == VCOrdering::VCGR {
+            self.node_causally_stable_vc = cs_vc;
+            self.new_causally_stable_vc = true;
+        }
+
+        Ok(())
     }
 }
