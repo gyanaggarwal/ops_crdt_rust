@@ -87,6 +87,11 @@ fn test_base_trcb() {
     let v003 = trcb1.add_peer_vc(*node2, cc003.clone()).unwrap();
     println!("v003 {:?}", v003);
     println!("t003 {:?}", trcb1);
+
+    let cs = trcb1.causally_stable();
+
+    println!("cs {:?}", cs);
+
 }
 
 

@@ -48,7 +48,7 @@ impl TRCBData {
         Ok(peer_vc_status)
     }
 
-    pub fn causally_stable(&mut self) -> Result<VectorClock, VectorClockError> {
+    pub fn causally_stable(& self) -> Result<VectorClock, VectorClockError> {
         let mut cs_map: HashMap<NodeType, LCType> = HashMap::new();
 
         for (nnode, nlc) in self.node_vector_clock.vcmap.iter() {
