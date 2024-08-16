@@ -24,6 +24,13 @@ pub enum VCOrdering {
     VCCN
 }
 
+#[derive(Debug, PartialEq)]
+pub enum VCStatus {
+    DUPLICATE,
+    INORDER,
+    OUTOFORDER
+}
+
 #[derive(Debug, Clone)]
 pub struct VectorClock {
     pub vcmap: HashMap<NodeType, LCType>
@@ -57,10 +64,11 @@ impl VectorClock {
         }
     }
 
-    pub fn is_next_vc(&self, node: &NodeType, peer_vc: &VectorClock) -> Result<bool, VectorClockError> {
+    pub fn is_next_vc(&self, node: &NodeType, peer_vc: &VectorClock) -> Result<VCStatus, VectorClockError> {
         let nlc = self.vcmap.get(node).ok_or(VectorClockError::NodeNotFound)?;
         let plc = peer_vc.vcmap.get(node).ok_or(VectorClockError::NodeNotFound)?;
-        Ok(*nlc+INC_LC == *plc)
+        let vc_status = cmp_lc(*nlc+INC_LC, *plc);
+        Ok(peer_vc_status(vc_status))
     }
 
     pub fn cmp_vc(&self, other: &VectorClock) -> Result<VCOrdering, VectorClockError> {
@@ -71,7 +79,7 @@ impl VectorClock {
         let mut vcords = VCOrdering::VCEQ;
         for (node, lc1) in self.vcmap.iter() {
             let lc2 = other.vcmap.get(node).ok_or(VectorClockError::NonCompatibleVC)?;
-            let vcordo = cmp_lc(lc1, lc2);
+            let vcordo = cmp_lc(*lc1, *lc2);
             vcords = vc_order(vcords, vcordo);
         }
 
@@ -93,10 +101,18 @@ pub fn vc_order(st1: VCOrdering, st2: VCOrdering) -> VCOrdering {
     }
 }
 
-pub fn cmp_lc(lc1: &LCType, lc2: &LCType) -> VCOrdering {
-    match lc1.cmp(lc2) {
+pub fn cmp_lc(lc1: LCType, lc2: LCType) -> VCOrdering {
+    match lc1.cmp(&lc2) {
         Ordering::Less    => VCOrdering::VCLE,
         Ordering::Equal   => VCOrdering::VCEQ,
         Ordering::Greater => VCOrdering::VCGR
+    }
+}
+
+pub fn peer_vc_status(pord: VCOrdering) -> VCStatus {
+    match pord {
+        VCOrdering::VCGR => VCStatus::DUPLICATE,
+        VCOrdering::VCEQ => VCStatus::INORDER,
+        _                => VCStatus::OUTOFORDER
     }
 }

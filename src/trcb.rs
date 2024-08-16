@@ -1,13 +1,11 @@
 use std::collections::HashMap;
 use crate::{LCType, NodeType};
-use crate::vector_clock::{VectorClock, VectorClockError, VCOrdering};
+use crate::vector_clock::{VectorClock, VectorClockError, VCStatus};
 
 #[derive(Debug)]
 pub struct TRCBData {
     pub node: NodeType,
     pub node_vector_clock: VectorClock,
-    pub node_causally_stable_vc: VectorClock,
-    pub new_causally_stable_vc: bool,
     pub node_trcb: HashMap<NodeType, VectorClock>
 }
 
@@ -29,9 +27,7 @@ impl TRCBData {
         
         Ok(Self {
             node,
-            node_vector_clock: vc.clone(),
-            node_causally_stable_vc: vc,
-            new_causally_stable_vc: false,
+            node_vector_clock: vc,
             node_trcb
         })
     }
@@ -41,18 +37,18 @@ impl TRCBData {
         Ok(self.node_vector_clock.clone())
     }
 
-    pub fn add_peer_vc(&mut self, peer_node: NodeType, peer_vc: VectorClock) -> Result<(), VectorClockError> {
+    pub fn add_peer_vc(&mut self, peer_node: NodeType, peer_vc: VectorClock) -> Result<VCStatus, VectorClockError> {
         let peer_vc_status = self.node_vector_clock.is_next_vc(&peer_node, &peer_vc)?;
 
-        if peer_vc_status {
+        if peer_vc_status == VCStatus::INORDER {
             self.node_vector_clock.next_vc(&peer_node)?;
             self.node_trcb.insert(peer_node, peer_vc);
         }
     
-        Ok(())
+        Ok(peer_vc_status)
     }
 
-    pub fn causally_stable(&mut self) -> Result<(), VectorClockError> {
+    pub fn causally_stable(&mut self) -> Result<VectorClock, VectorClockError> {
         let mut cs_map: HashMap<NodeType, LCType> = HashMap::new();
 
         for (nnode, nlc) in self.node_vector_clock.vcmap.iter() {
@@ -66,13 +62,6 @@ impl TRCBData {
             cs_map.insert(*nnode, *mlc);
         };
 
-        let cs_vc = VectorClock{vcmap: cs_map};
-
-        if cs_vc.cmp_vc(&self.node_causally_stable_vc)? == VCOrdering::VCGR {
-            self.node_causally_stable_vc = cs_vc;
-            self.new_causally_stable_vc = true;
-        }
-
-        Ok(())
+        Ok(VectorClock{vcmap: cs_map})
     }
 }
