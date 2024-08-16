@@ -56,12 +56,10 @@ impl VectorClock {
     }
 
     pub fn next_vc(&mut self, node: &NodeType) -> Result<(), VectorClockError> {
-        if let Some(lc) = self.vcmap.get_mut(node) {
-            *lc += INC_LC;
-            Ok(())
-        } else {
-            Err(VectorClockError::NodeNotFound)
-        }
+        let lc = self.vcmap.get_mut(node).ok_or(VectorClockError::NodeNotFound)?;
+        *lc += INC_LC;
+        Ok(())
+
     }
 
     pub fn is_next_vc(&self, node: &NodeType, peer_vc: &VectorClock) -> Result<VCStatus, VectorClockError> {
