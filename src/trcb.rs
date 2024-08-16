@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::cmp;
 use crate::{LCType, NodeType};
 use crate::vector_clock::{VectorClock, VectorClockError, VCStatus};
 
@@ -48,16 +49,14 @@ impl TRCBData {
         Ok(peer_vc_status)
     }
 
-    pub fn causally_stable(& self) -> Result<VectorClock, VectorClockError> {
+    pub fn causally_stable(&self) -> Result<VectorClock, VectorClockError> {
         let mut cs_map: HashMap<NodeType, LCType> = HashMap::new();
 
         for (nnode, nlc) in self.node_vector_clock.vcmap.iter() {
             let mut mlc = nlc;
             for (_, pvc) in &self.node_trcb {
-                match pvc.vcmap.get(nnode) {
-                    Some(plc) => if plc < mlc {mlc = plc},
-                    None => return Err(VectorClockError::UnexpectedError)
-                }
+                let plc = pvc.vcmap.get(nnode).ok_or(VectorClockError::UnexpectedError)?;
+                mlc = cmp::min(mlc, plc);
             }
             cs_map.insert(*nnode, *mlc);
         };
