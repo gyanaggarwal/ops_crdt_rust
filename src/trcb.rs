@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::cmp;
+
 use crate::{LCType, NodeType};
 use crate::vector_clock::{VectorClock, VectorClockError, VCStatus};
 

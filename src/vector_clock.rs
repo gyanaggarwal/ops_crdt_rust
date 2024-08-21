@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::cmp::Ordering;
+use serde::{Serialize, Deserialize};
 
 use crate::{LCType, NodeType};
 
@@ -31,7 +32,7 @@ pub enum VCStatus {
     OUTOFORDER
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VectorClock {
     pub vcmap: HashMap<NodeType, LCType>
 }
