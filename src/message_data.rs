@@ -13,11 +13,11 @@ pub struct PNCounter;
 pub struct NoCrdt;
 
 #[derive(Debug)]
-pub struct CRDT <CrdtValue, MsgType, State = NoCrdt> {
+pub struct CRDT <CrdtValue, OpsType, State = NoCrdt> {
     pub crdt_type: CrdtType,
     pub instance_num: CRDTNumType,
     pub trcb: TRCBData,
-    pub msg_list: Vec<MsgType>,
+    pub msg_list: Vec<NodeMsg<OpsType>>,
     pub crdt_value: CrdtValue,
     pub state: std::marker::PhantomData<State>
 }
