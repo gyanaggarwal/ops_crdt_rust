@@ -4,12 +4,7 @@ node_instance.rs
   node_list
   map -> (crdt_type, crdt_instance_no) : new crdt_instance_id (node, crdt_type, instance_num)
   map -> (crdt_instance_id, crdt_instance) : get crdt_instance/create new crdt_instance
-
-crdt.rs
-  enum for crdt_type
-  struct for crdt_instance_id
-  logic for applying user message/peer update message/peer vector clock message
-
+  it will convert user_msg to node_msg by adding vector_clock
 */
 pub type LCType       = u32;
 pub type NodeType     = u16;

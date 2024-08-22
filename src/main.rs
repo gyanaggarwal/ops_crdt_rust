@@ -1,10 +1,11 @@
 use serde_json;
 
-use ops_crdt_rust::message_data::CrdtInstance;
+use ops_crdt_rust::crdt::{CrdtInstance, CRDT, AddMult, EDFlag, EWFlag};
 use ops_crdt_rust::message_data::OpsInstance;
 use ops_crdt_rust::message_data::UserUpdateMsg;
 use ops_crdt_rust::vector_clock;
 use ops_crdt_rust::message_data;
+use ops_crdt_rust::crdt;
 use ops_crdt_rust::trcb;
 use ops_crdt_rust::NodeType;
 
@@ -12,12 +13,21 @@ fn main() {
     test_vector_clock();
     test_base_trcb();
     test_msg_serde();
+    test_crdt();
 }
 
 fn create_node_list() -> Vec<NodeType> {
     vec![0,1,2]
 }
 
+fn test_crdt() {
+    let node_list = create_node_list();
+    let crdt_instance1: CRDT<u32, u32, AddMult> = CRDT::new(0, node_list.clone(), 0).unwrap();
+    println!("crdt_instance1 {:?}", crdt_instance1);
+
+    let crdt_instance2: CRDT<EDFlag, EDFlag, EWFlag> = CRDT::new(0, node_list, EDFlag::Disabled).unwrap();
+    println!("crdt_instance2 {:?}", crdt_instance2);
+}
 fn test_msg_serde() {
     let node_list = create_node_list();
     let vc000 = vector_clock::VectorClock::new(node_list).unwrap();
@@ -30,7 +40,7 @@ fn test_msg_serde() {
     let pn_msg0: message_data::PeerNodeMsg<i32> = message_data::PeerNodeMsg::VectorClockNodeMsg(vc_msg0);
 
     let ops_instance: OpsInstance<i32> = OpsInstance::new(message_data::SDPOpsType::SPDNonCommuAdd, 10);
-    let crdt_instance = CrdtInstance::new(0, 0, message_data::CrdtType::AddMultCrdt);
+    let crdt_instance = CrdtInstance::new(0, 0, crdt::CrdtType::AddMultCrdt);
     let user_msg: UserUpdateMsg<i32> = message_data::UserUpdateMsg::new(crdt_instance, ops_instance);
     let node_msg1 = message_data::NodeUpdateMsg::new(0, vc010.clone(), user_msg);
     let pn_msg1: message_data::PeerNodeMsg<i32> = message_data::PeerNodeMsg::UpdateNodeMsg(node_msg1);
@@ -75,8 +85,7 @@ fn test_vector_clock() {
     let cmp13 = cc100r.cmp_vc(cc110r).unwrap();
     let cmp31 = cc110r.cmp_vc(cc100r).unwrap();
 
-    println!("cmp11 {:?} cmp12 {:?} cmp21 {:?} cmp13 {:?} cmp31 {:?}", 
-             cmp11, cmp12, cmp21, cmp13, cmp31);
+    println!("cmp11 {:?} cmp12 {:?} cmp21 {:?} cmp13 {:?} cmp31 {:?}", cmp11, cmp12, cmp21, cmp13, cmp31);
 
 }
 

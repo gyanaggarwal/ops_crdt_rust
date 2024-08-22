@@ -1,17 +1,13 @@
 use serde::{Serialize, Deserialize};
 
-use crate::trcb::TRCBData;
+//use crate::trcb::TRCBData;
 use crate::vector_clock::VectorClock;
-use crate::{NodeType, CRDTNumType};
+//use crate::{NodeType, CRDTNumType};
+use crate::NodeType;
+//use crate::crdt::{CrdtType, CrdtInstance};
+use crate::crdt::CrdtInstance;
 
-pub struct AddMult;
-pub struct EWFlag;
-pub struct DWFlag;
-pub struct AWSet;
-pub struct RWSet;
-pub struct PNCounter;
-pub struct NoCrdt;
-
+/*
 #[derive(Debug)]
 pub struct CRDT <CrdtValue, OpsType, State = NoCrdt> {
     pub crdt_type: CrdtType,
@@ -21,32 +17,12 @@ pub struct CRDT <CrdtValue, OpsType, State = NoCrdt> {
     pub crdt_value: CrdtValue,
     pub state: std::marker::PhantomData<State>
 }
-
+*/
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum SDPOpsType {
     SPDNonCommuAdd,
     SPDNonCommuMult,
     SPDCommu
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub enum CrdtType {
-    AddMultCrdt,
-    EWFlagCrdt,
-    DWFlagCrdt,
-    PNCounterCrdt
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct CrdtInstance {
-    instance_node_id: NodeType,
-    instance_num: CRDTNumType,
-    instance_type: CrdtType
-}
-impl CrdtInstance {
-    pub fn new(instance_node_id: NodeType, instance_num: CRDTNumType, instance_type: CrdtType) -> Self {
-        Self{instance_node_id, instance_num, instance_type}
-    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
