@@ -1,3 +1,5 @@
+use std::fmt;
+
 use serde::{Serialize, Deserialize};
 
 use crate::{NodeType, CRDTNumType};
@@ -31,6 +33,15 @@ pub enum EDFlag {
     Enabled,
     Disabled
 }
+impl fmt::Display for EDFlag {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let printable = match *self {
+            EDFlag::Enabled => "Enabled",
+            EDFlag::Disabled => "Disabled"
+        };
+        write!(f, "{}", printable)
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CrdtInstance {
@@ -45,14 +56,14 @@ impl CrdtInstance {
 }
 
 #[derive(Debug)]
-pub struct CRDT <CrdtValue, OpsValue, State> {
+pub struct CRDT <CrdtValue, OpsValue: fmt::Display, State> {
     pub trcb: trcb::TRCBData,
     pub msg_list: Vec<NodeUpdateMsg<OpsValue>>,
     pub crdt_value: CrdtValue,
     pub state: std::marker::PhantomData<State>
 }
 
-impl <CrdtValue, OpsValue, State> CRDT<CrdtValue, OpsValue, State> {
+impl <CrdtValue, OpsValue: fmt::Display, State> CRDT<CrdtValue, OpsValue, State> {
     pub fn new(node: NodeType, node_list: Vec<NodeType>, crdt_value: CrdtValue) -> Result<Self, VectorClockError> {
         let trcb = trcb::TRCBData::new(node, node_list)?;
         let msg_list = Vec::new();
@@ -68,13 +79,13 @@ impl <CrdtValue, OpsValue, State> CRDT<CrdtValue, OpsValue, State> {
     }
 }
 
-impl <CrdtValue, OpsValue> CRDT<CrdtValue, OpsValue, AddMult> {
+impl <CrdtValue, OpsValue: fmt::Display> CRDT<CrdtValue, OpsValue, AddMult> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
         todo!();
     }
 }
 
-impl <CrdtValue, OpsValue> CRDT<CrdtValue, OpsValue, EWFlag> {
+impl <CrdtValue, OpsValue: fmt::Display> CRDT<CrdtValue, OpsValue, EWFlag> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
         todo!();
     }

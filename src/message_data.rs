@@ -1,23 +1,11 @@
+use std::fmt::Display;
+
 use serde::{Serialize, Deserialize};
 
-//use crate::trcb::TRCBData;
 use crate::vector_clock::VectorClock;
-//use crate::{NodeType, CRDTNumType};
 use crate::NodeType;
-//use crate::crdt::{CrdtType, CrdtInstance};
 use crate::crdt::CrdtInstance;
 
-/*
-#[derive(Debug)]
-pub struct CRDT <CrdtValue, OpsType, State = NoCrdt> {
-    pub crdt_type: CrdtType,
-    pub instance_num: CRDTNumType,
-    pub trcb: TRCBData,
-    pub msg_list: Vec<NodeUpdateMsg<OpsType>>,
-    pub crdt_value: CrdtValue,
-    pub state: std::marker::PhantomData<State>
-}
-*/
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum SDPOpsType {
     SPDNonCommuAdd,
@@ -26,34 +14,34 @@ pub enum SDPOpsType {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct OpsInstance <OpsValue> {
+pub struct OpsInstance <OpsValue: Display> {
     pub ops: SDPOpsType,
     pub ops_value: OpsValue
 }
-impl <OpsValue> OpsInstance<OpsValue> {
+impl <OpsValue: Display> OpsInstance<OpsValue> {
     pub fn new(ops: SDPOpsType, ops_value: OpsValue) -> Self {
         Self {ops, ops_value}
     }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct UserUpdateMsg <OpsValue> {
+pub struct UserUpdateMsg <OpsValue: Display> {
     pub crdt_instance: CrdtInstance,
     pub ops_instance: OpsInstance<OpsValue>
 }
-impl <OpsValue> UserUpdateMsg<OpsValue> {
+impl <OpsValue: Display> UserUpdateMsg<OpsValue> {
     pub fn new(crdt_instance: CrdtInstance, ops_instance: OpsInstance<OpsValue>) -> Self {
         Self {crdt_instance, ops_instance}
     }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct NodeUpdateMsg <OpsValue> {
+pub struct NodeUpdateMsg <OpsValue: Display> {
     pub node: NodeType,
     pub node_vector_clock: VectorClock,
     pub user_update_msg: UserUpdateMsg<OpsValue>
 }
-impl <OpsValue> NodeUpdateMsg<OpsValue> {
+impl <OpsValue: Display> NodeUpdateMsg<OpsValue> {
     pub fn new(node:NodeType, node_vector_clock: VectorClock, user_update_msg: UserUpdateMsg<OpsValue>) -> Self {
         Self {node, node_vector_clock, user_update_msg}
     }
@@ -70,7 +58,7 @@ impl NodeVectorClockMsg {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub enum PeerNodeMsg <OpsValue> {
+pub enum PeerNodeMsg <OpsValue: Display> {
     VectorClockNodeMsg(NodeVectorClockMsg),
     UpdateNodeMsg(NodeUpdateMsg<OpsValue>)
 }
