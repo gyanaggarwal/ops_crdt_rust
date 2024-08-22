@@ -13,7 +13,7 @@ pub struct TRCBData {
 
 impl TRCBData {
     pub fn new(node: NodeType, node_list: Vec<NodeType>) -> Result<Self, VectorClockError> {
-        let vc = VectorClock::new(node_list.clone())?;
+        let node_vector_clock = VectorClock::new(node_list.clone())?;
 
         if !&node_list.contains(&node) {
             return Err(VectorClockError::InconsistentInputTRBC(node, node_list));
@@ -23,13 +23,13 @@ impl TRCBData {
 
         for pnode in node_list {
             if pnode != node {
-                node_trcb.insert(pnode, vc.clone());
+                node_trcb.insert(pnode, node_vector_clock.clone());
             }
         }
         
         Ok(Self {
             node,
-            node_vector_clock: vc,
+            node_vector_clock,
             node_trcb
         })
     }

@@ -2,7 +2,7 @@ use serde_json;
 
 use ops_crdt_rust::message_data::CrdtInstance;
 use ops_crdt_rust::message_data::OpsInstance;
-use ops_crdt_rust::message_data::UserMsg;
+use ops_crdt_rust::message_data::UserUpdateMsg;
 use ops_crdt_rust::vector_clock;
 use ops_crdt_rust::message_data;
 use ops_crdt_rust::trcb;
@@ -26,16 +26,18 @@ fn test_msg_serde() {
     let mut vc010 = vc000.clone();
     vc010.next_vc(node1).unwrap();
 
-    let vc_msg0 = message_data::VectorClockMsg::new(0, vc000.clone());
-    let pn_msg0: message_data::PeerNodeMsg<i32> = message_data::PeerNodeMsg::VCNodeMsg(vc_msg0);
+    let vc_msg0 = message_data::NodeVectorClockMsg::new(0, vc000.clone());
+    let pn_msg0: message_data::PeerNodeMsg<i32> = message_data::PeerNodeMsg::VectorClockNodeMsg(vc_msg0);
 
     let ops_instance: OpsInstance<i32> = OpsInstance::new(message_data::SDPOpsType::SPDNonCommuAdd, 10);
     let crdt_instance = CrdtInstance::new(0, 0, message_data::CrdtType::AddMultCrdt);
-    let user_msg: UserMsg<i32> = message_data::UserMsg::new(crdt_instance, ops_instance);
-    let node_msg1 = message_data::NodeMsg::new(0, vc010.clone(), user_msg);
-    let pn_msg1: message_data::PeerNodeMsg<i32> = message_data::PeerNodeMsg::UserNodeMsg(node_msg1);
+    let user_msg: UserUpdateMsg<i32> = message_data::UserUpdateMsg::new(crdt_instance, ops_instance);
+    let node_msg1 = message_data::NodeUpdateMsg::new(0, vc010.clone(), user_msg);
+    let pn_msg1: message_data::PeerNodeMsg<i32> = message_data::PeerNodeMsg::UpdateNodeMsg(node_msg1);
 
-    let msg_list = vec![pn_msg0, pn_msg1];
+    let mut msg_list = Vec::new();
+    msg_list.push(pn_msg0.clone());
+    msg_list.push(pn_msg1.clone());
     let tmsg_list = serde_json::to_string(&msg_list).unwrap();
     let fmsg_list: Vec<message_data::PeerNodeMsg<i32>> = serde_json::from_str(&tmsg_list).unwrap();
     println!("tmsg_list {:?}", tmsg_list);
