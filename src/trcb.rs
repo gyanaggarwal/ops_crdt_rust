@@ -50,6 +50,13 @@ impl TRCBData {
         Ok(peer_vc_status)
     }
 
+    pub fn add_peer_vcmsg(&mut self, peer_node: NodeType, peer_vc: VectorClock) -> Result<(), VectorClockError> {
+        let cvc = self.node_trcb.get(&peer_node).ok_or(VectorClockError::NodeNotFound)?;
+        let mvc = cvc.max_vc(&peer_vc)?;
+        self.node_trcb.insert(peer_node, mvc);
+        Ok(())
+    }
+
     pub fn causally_stable(&self) -> Result<VectorClock, VectorClockError> {
         let mut cs_map: HashMap<NodeType, LCType> = HashMap::new();
 

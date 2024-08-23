@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{cmp::max, cmp::min, collections::HashMap};
 use std::cmp::Ordering;
 use serde::{Serialize, Deserialize};
 
@@ -84,6 +84,25 @@ impl VectorClock {
 
         Ok(vcords)
     }
+
+    pub fn min_max_vc(&self, other: &VectorClock, f: fn(LCType, LCType) -> LCType) -> Result<VectorClock, VectorClockError> {
+        let mut vcmap = HashMap::new();
+        for (node, lc1) in self.vcmap.iter() {
+            let lc2 = other.vcmap.get(node).ok_or(VectorClockError::NonCompatibleVC)?;
+            let flc = f(*lc1, *lc2);
+            vcmap.insert(*node, flc);
+        }
+
+        Ok(VectorClock{vcmap})
+    }
+
+    pub fn max_vc(&self, other: &VectorClock) -> Result<VectorClock, VectorClockError> {
+        self.min_max_vc(other, max)
+    }
+
+    pub fn min_vc(&self, other: &VectorClock) -> Result<VectorClock, VectorClockError> {
+        self.min_max_vc(other, min)
+    }    
 }
 
 pub fn vc_order(st1: VCOrdering, st2: VCOrdering) -> VCOrdering {

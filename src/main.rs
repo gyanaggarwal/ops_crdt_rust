@@ -1,6 +1,7 @@
 use serde_json;
+use std::collections::HashSet;
 
-use ops_crdt_rust::crdt::{CrdtInstance, CRDT, AddMult, EDFlag, EWFlag};
+use ops_crdt_rust::crdt::{AWSet, AddMult, CrdtInstance, EDFlag, EWFlag, CRDT};
 use ops_crdt_rust::message_data::OpsInstance;
 use ops_crdt_rust::message_data::UserUpdateMsg;
 use ops_crdt_rust::vector_clock;
@@ -25,9 +26,13 @@ fn test_crdt() {
     let crdt_instance1: CRDT<u32, u32, AddMult> = CRDT::new(0, node_list.clone(), 0).unwrap();
     println!("crdt_instance1 {:?}", crdt_instance1);
 
-    let crdt_instance2: CRDT<EDFlag, EDFlag, EWFlag> = CRDT::new(0, node_list, EDFlag::Disabled).unwrap();
+    let crdt_instance2: CRDT<EDFlag, EDFlag, EWFlag> = CRDT::new(0, node_list.clone(), EDFlag::Disabled).unwrap();
     println!("crdt_instance2 {:?}", crdt_instance2);
+
+    let crdt_instance3: CRDT<HashSet<i32>, i32, AWSet> = CRDT::new(0, node_list.clone(), HashSet::new()).unwrap();
+    println!("crdt_instance3 {:?}", crdt_instance3);
 }
+
 fn test_msg_serde() {
     let node_list = create_node_list();
     let vc000 = vector_clock::VectorClock::new(node_list).unwrap();

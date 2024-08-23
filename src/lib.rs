@@ -16,6 +16,8 @@ pub mod trcb;
 
 pub mod message_data;
 
+pub mod message_list;
+
 pub mod anti_entropy;
 
 pub mod node;

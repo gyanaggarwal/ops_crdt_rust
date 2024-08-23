@@ -6,6 +6,7 @@ use crate::{NodeType, CRDTNumType};
 use crate::trcb;
 use crate::vector_clock::VectorClockError;
 use crate::message_data::{NodeUpdateMsg, NodeVectorClockMsg};
+use crate::message_list;
 
 #[derive(Debug)]
 pub struct AddMult;
@@ -25,6 +26,8 @@ pub enum CrdtType {
     AddMultCrdt,
     EWFlagCrdt,
     DWFlagCrdt,
+    AWSetCrdt,
+    RWSetCrdt,
     PNCounterCrdt
 }
 
@@ -56,14 +59,14 @@ impl CrdtInstance {
 }
 
 #[derive(Debug)]
-pub struct CRDT <CrdtValue, OpsValue: fmt::Display, State> {
+pub struct CRDT <CrdtValue: Clone, OpsValue: fmt::Display+Clone, State> {
     pub trcb: trcb::TRCBData,
     pub msg_list: Vec<NodeUpdateMsg<OpsValue>>,
     pub crdt_value: CrdtValue,
     pub state: std::marker::PhantomData<State>
 }
 
-impl <CrdtValue, OpsValue: fmt::Display, State> CRDT<CrdtValue, OpsValue, State> {
+impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone, State> CRDT<CrdtValue, OpsValue, State> {
     pub fn new(node: NodeType, node_list: Vec<NodeType>, crdt_value: CrdtValue) -> Result<Self, VectorClockError> {
         let trcb = trcb::TRCBData::new(node, node_list)?;
         let msg_list = Vec::new();
@@ -74,19 +77,54 @@ impl <CrdtValue, OpsValue: fmt::Display, State> CRDT<CrdtValue, OpsValue, State>
         self.msg_list.push(msg);
     }
 
-    pub fn process_vc_msg(&mut self, _msg: NodeVectorClockMsg) {
-        todo!();
+    pub fn process_vc_msg(&mut self, msg: NodeVectorClockMsg) -> Result<(), VectorClockError> {
+        self.trcb.add_peer_vcmsg(msg.node, msg.node_vector_clock)
+    }
+
+    pub fn causally_stable(&mut self) -> Result<(), VectorClockError> {
+        let cs_vc = self.trcb.causally_stable()?;
+        let new_list = message_list::remove_causally_stable(&cs_vc, self.msg_list.clone())?;
+        self.msg_list = new_list;
+        Ok(())
+    }
+
+    pub fn query(&self) -> CrdtValue {
+        self.crdt_value.clone()
     }
 }
 
-impl <CrdtValue, OpsValue: fmt::Display> CRDT<CrdtValue, OpsValue, AddMult> {
+impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone> CRDT<CrdtValue, OpsValue, AddMult> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
         todo!();
     }
 }
 
-impl <CrdtValue, OpsValue: fmt::Display> CRDT<CrdtValue, OpsValue, EWFlag> {
+impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone> CRDT<CrdtValue, OpsValue, EWFlag> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
         todo!();
+    }
+}
+
+impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone> CRDT<CrdtValue, OpsValue, DWFlag> {
+    pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
+        todo!();
+    }
+}
+
+impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone> CRDT<CrdtValue, OpsValue, AWSet> {
+    pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
+        todo!()
+    }
+}
+
+impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone> CRDT<CrdtValue, OpsValue, RWSet> {
+    pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
+        todo!()
+    }
+}
+
+impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone> CRDT<CrdtValue, OpsValue, PNCounter> {
+    pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
+        todo!()
     }
 }
