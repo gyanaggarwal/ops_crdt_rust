@@ -1,5 +1,6 @@
 use serde_json;
-use std::collections::{HashSet, HashMap};
+use std::collections::HashSet;
+use dotenvy::dotenv;
 
 use ops_crdt_rust::crdt::{AWSet, AddMult, CrdtInstance, EDFlag, EWFlag, CRDT};
 use ops_crdt_rust::message_data::OpsInstance;
@@ -9,21 +10,24 @@ use ops_crdt_rust::message_data;
 use ops_crdt_rust::crdt;
 use ops_crdt_rust::trcb;
 use ops_crdt_rust::NodeType;
+use ops_crdt_rust::constants::{MAX_MSG_COUNT_CS, MAX_MSG_COUNT_VC, NODE_LIST};
+
 
 fn main() {
     test_vector_clock();
     test_base_trcb();
     test_msg_serde();
     test_crdt();
-
     run_crdt();
 }
 
 fn run_crdt() {
-    let mut msg_list1 = HashMap::new();
-    msg_list1.insert((5,3), "msg53".to_string());
-    msg_list1.insert((1,1), "msg11".to_string());
-    println!("msg_list {:?}", msg_list1);
+    dotenv().ok();
+    let max_msg_vc = MAX_MSG_COUNT_VC.to_owned();
+    let max_msg_cs = MAX_MSG_COUNT_CS.to_owned();
+    let node_list = NODE_LIST.to_owned();
+
+    println!("vc {}, cs {}, nl {:?}", max_msg_vc, max_msg_cs, node_list);
 }
 
 fn create_node_list() -> Vec<NodeType> {
