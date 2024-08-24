@@ -1,8 +1,9 @@
 use std::fmt;
+use std::collections::HashMap;
 
 use serde::{Serialize, Deserialize};
 
-use crate::{NodeType, CRDTNumType};
+use crate::{CRDTNumType, LCType, NodeType};
 use crate::trcb;
 use crate::vector_clock::VectorClockError;
 use crate::message_data::{NodeUpdateMsg, NodeVectorClockMsg};
@@ -61,7 +62,7 @@ impl CrdtInstance {
 #[derive(Debug)]
 pub struct CRDT <CrdtValue: Clone, OpsValue: fmt::Display+Clone, State> {
     pub trcb: trcb::TRCBData,
-    pub msg_list: Vec<NodeUpdateMsg<OpsValue>>,
+    pub msg_list: HashMap<(NodeType, LCType), NodeUpdateMsg<OpsValue>>,
     pub crdt_value: CrdtValue,
     pub state: std::marker::PhantomData<State>
 }
@@ -69,27 +70,35 @@ pub struct CRDT <CrdtValue: Clone, OpsValue: fmt::Display+Clone, State> {
 impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone, State> CRDT<CrdtValue, OpsValue, State> {
     pub fn new(node: NodeType, node_list: Vec<NodeType>, crdt_value: CrdtValue) -> Result<Self, VectorClockError> {
         let trcb = trcb::TRCBData::new(node, node_list)?;
-        let msg_list = Vec::new();
+        let msg_list = HashMap::new();
         Ok(Self{trcb, msg_list, crdt_value, state: std::marker::PhantomData::<State>})
     }
 
-    pub fn add_msg(&mut self, msg: NodeUpdateMsg<OpsValue>) {
-        self.msg_list.push(msg);
+    pub fn add_msg(&mut self, msg: NodeUpdateMsg<OpsValue>) -> Result<(), VectorClockError> {
+        let lc = msg.node_vector_clock.vcmap.get(&msg.node).ok_or(VectorClockError::NodeNotFound)?;
+        self.msg_list.insert((msg.node, lc.clone()), msg);
+        Ok(())
     }
 
     pub fn process_vc_msg(&mut self, msg: NodeVectorClockMsg) -> Result<(), VectorClockError> {
         self.trcb.add_peer_vcmsg(msg.node, msg.node_vector_clock)
     }
 
+    // use msg_count_cs
     pub fn causally_stable(&mut self) -> Result<(), VectorClockError> {
         let cs_vc = self.trcb.causally_stable()?;
-        let new_list = message_list::remove_causally_stable(&cs_vc, self.msg_list.clone())?;
+        let new_list = message_list::remove_causally_stable(&cs_vc, &self.msg_list)?;
         self.msg_list = new_list;
         Ok(())
     }
 
     pub fn query(&self) -> CrdtValue {
         self.crdt_value.clone()
+    }
+
+    //add vc_msg based on vc_msg_count
+    pub fn send_msg_list(&mut self, _node: NodeType) -> Result<Vec<NodeUpdateMsg<OpsValue>>, VectorClockError> {
+        todo!()
     }
 }
 
