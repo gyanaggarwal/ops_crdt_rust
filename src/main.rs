@@ -24,13 +24,13 @@ fn create_node_list() -> Vec<NodeType> {
 fn test_crdt() {
     let node_list = create_node_list();
     let crdt_instance1: CRDT<u32, u32, AddMult> = CRDT::new(0, node_list.clone(), 0).unwrap();
-    println!("crdt_instance1 {:?}", crdt_instance1);
+    println!("crdt_instance1 {:?} {:?}", crdt_instance1, crdt_instance1.query());
 
     let crdt_instance2: CRDT<EDFlag, EDFlag, EWFlag> = CRDT::new(0, node_list.clone(), EDFlag::Disabled).unwrap();
-    println!("crdt_instance2 {:?}", crdt_instance2);
+    println!("crdt_instance2 {:?} {:?}", crdt_instance2, crdt_instance2.query());
 
     let crdt_instance3: CRDT<HashSet<i32>, i32, AWSet> = CRDT::new(0, node_list.clone(), HashSet::new()).unwrap();
-    println!("crdt_instance3 {:?}", crdt_instance3);
+    println!("crdt_instance3 {:?} {:?}", crdt_instance3, crdt_instance3.query());
 }
 
 fn test_msg_serde() {

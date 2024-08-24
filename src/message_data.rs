@@ -46,6 +46,7 @@ impl <OpsValue: Display+Clone> NodeUpdateMsg<OpsValue> {
         Self {node, node_vector_clock, user_update_msg}
     }
 }
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct NodeVectorClockMsg {
     pub node: NodeType,

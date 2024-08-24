@@ -3,8 +3,9 @@ use std::fmt;
 use crate::vector_clock::{VectorClock, VectorClockError, VCOrdering};
 use crate::message_data::NodeUpdateMsg;
 
-pub fn remove_causally_stable<OpsValue: fmt::Display+Clone>(cs_vc: &VectorClock, msg_list: Vec<NodeUpdateMsg<OpsValue>>) 
-        -> Result<Vec<NodeUpdateMsg<OpsValue>>, VectorClockError> {
+pub fn remove_causally_stable<OpsValue: fmt::Display+Clone>(cs_vc: &VectorClock, 
+    msg_list: Vec<NodeUpdateMsg<OpsValue>>) -> 
+    Result<Vec<NodeUpdateMsg<OpsValue>>, VectorClockError> {
 
     let mut new_list = Vec::new();
 
