@@ -2,7 +2,7 @@ use serde_json;
 use std::collections::HashSet;
 use dotenvy::dotenv;
 
-use ops_crdt_rust::crdt::{AWSet, AddMult, CrdtInstance, EDFlag, EWFlag, CRDT};
+use ops_crdt_rust::crdt::{AWSet, AddMult, CrdtInstance, EDFlag, EWFlag, PNCounter, CRDT, PNCounterData};
 use ops_crdt_rust::message_data::OpsInstance;
 use ops_crdt_rust::message_data::UserUpdateMsg;
 use ops_crdt_rust::vector_clock;
@@ -11,7 +11,6 @@ use ops_crdt_rust::crdt;
 use ops_crdt_rust::trcb;
 use ops_crdt_rust::NodeType;
 use ops_crdt_rust::constants::{MAX_MSG_COUNT_CS, MAX_MSG_COUNT_VC, NODE_LIST};
-
 
 fn main() {
     test_vector_clock();
@@ -43,6 +42,9 @@ fn test_crdt() {
 
     let crdt_instance3: CRDT<HashSet<i32>, i32, AWSet> = CRDT::new(0, HashSet::new()).unwrap();
     println!("crdt_instance3 {:?} {:?}", crdt_instance3, crdt_instance3.query());
+
+    let crdt_instance4: CRDT<crdt::PNCounterData, u32, PNCounter> = CRDT::new(0, PNCounterData::new()).unwrap();
+    println!("crdt_instance4 {:?} {:?}", crdt_instance4, crdt_instance4.query());
 
     for i in 7..5 {
         println!("i75 {}", i);

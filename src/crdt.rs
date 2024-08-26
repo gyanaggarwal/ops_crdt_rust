@@ -3,12 +3,13 @@ use std::collections::HashMap;
 
 use serde::{Serialize, Deserialize};
 
-use crate::{CRDTNumType, LCType, NodeType};
+use crate::{CRDTNumType, LCType, NodeType, PNCounterOpsValue};
 use crate::trcb;
 use crate::vector_clock::VectorClockError;
 use crate::message_data::{NodeUpdateMsg, NodeVectorClockMsg};
 use crate::message_list;
 use crate::constants::{MAX_MSG_COUNT_CS, MAX_MSG_COUNT_VC, NODE_LIST};
+
 #[derive(Debug)]
 pub struct AddMult;
 #[derive(Debug)]
@@ -32,6 +33,16 @@ pub enum CrdtType {
     PNCounterCrdt
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct PNCounterData {
+    pcount: PNCounterOpsValue,
+    ncount: PNCounterOpsValue
+}
+impl PNCounterData {
+    pub fn new() -> Self {
+        Self{pcount:0, ncount:0}
+    }
+}
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum EDFlag {
     Enabled,
@@ -113,8 +124,8 @@ impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone, State> CRDT<CrdtValue, Ops
     }
 }
 
-impl <IntMultCrdtValue: Clone, IntMultOpsValue: fmt::Display+Clone> CRDT<IntMultCrdtValue, IntMultOpsValue, AddMult> {
-    pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<IntMultOpsValue>) {
+impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone> CRDT<CrdtValue, OpsValue, AddMult> {
+    pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
         todo!();
     }
 }
