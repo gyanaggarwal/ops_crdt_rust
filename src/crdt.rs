@@ -8,7 +8,7 @@ use crate::trcb;
 use crate::vector_clock::VectorClockError;
 use crate::message_data::{NodeUpdateMsg, NodeVectorClockMsg};
 use crate::message_list;
-
+use crate::constants::{MAX_MSG_COUNT_CS, MAX_MSG_COUNT_VC, NODE_LIST};
 #[derive(Debug)]
 pub struct AddMult;
 #[derive(Debug)]
@@ -64,14 +64,25 @@ pub struct CRDT <CrdtValue: Clone, OpsValue: fmt::Display+Clone, State> {
     pub trcb: trcb::TRCBData,
     pub msg_list: HashMap<(NodeType, LCType), NodeUpdateMsg<OpsValue>>,
     pub crdt_value: CrdtValue,
+    pub max_msg_count_vc: u16,
+    pub max_msg_count_cs: u16,
+    pub msg_count_vc: u16,
+    pub msg_count_cs: u16,
     pub state: std::marker::PhantomData<State>
 }
 
 impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone, State> CRDT<CrdtValue, OpsValue, State> {
-    pub fn new(node: NodeType, node_list: Vec<NodeType>, crdt_value: CrdtValue) -> Result<Self, VectorClockError> {
-        let trcb = trcb::TRCBData::new(node, node_list)?;
+    pub fn new(node: NodeType, crdt_value: CrdtValue) -> Result<Self, VectorClockError> {
+        let trcb = trcb::TRCBData::new(node, NODE_LIST.to_owned().clone())?;
         let msg_list = HashMap::new();
-        Ok(Self{trcb, msg_list, crdt_value, state: std::marker::PhantomData::<State>})
+        Ok(Self{trcb, 
+                msg_list, 
+                crdt_value, 
+                max_msg_count_vc: MAX_MSG_COUNT_VC.to_owned(),
+                max_msg_count_cs: MAX_MSG_COUNT_CS.to_owned(),
+                msg_count_vc: 0,
+                msg_count_cs: 0,
+                state: std::marker::PhantomData::<State>})
     }
 
     pub fn add_msg(&mut self, msg: NodeUpdateMsg<OpsValue>) -> Result<(), VectorClockError> {
@@ -102,8 +113,8 @@ impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone, State> CRDT<CrdtValue, Ops
     }
 }
 
-impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone> CRDT<CrdtValue, OpsValue, AddMult> {
-    pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
+impl <IntMultCrdtValue: Clone, IntMultOpsValue: fmt::Display+Clone> CRDT<IntMultCrdtValue, IntMultOpsValue, AddMult> {
+    pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<IntMultOpsValue>) {
         todo!();
     }
 }

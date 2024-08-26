@@ -7,20 +7,30 @@ node_instance.rs
   it will convert user_msg to node_msg by adding vector_clock
   it will serialize the outgoing messages
   it will deserialize incoming messages
-  it will check if incoming message is INORDER
 
 crdt.rs
-  msg_list: map -> (nodetype, lctype) -> message
+  when receive a NodeUpdateMsg,
+  if the msg is a local update 
+    make msg_count_vc = 0
+    make msg_count_cs = add 1
+    update crdt
+    make a send_list with no vc_msg
+  else 
+    make msg_count_vc = add 1
 
-constants.rs
-  node_list
-  message_count_to_run_causally_stable
-  message_count_to_add_vector_clock  
+  add 1 to msg_count_vc
+  if it is a duplicate msg, ignore it
+  produce a list of send_msg including vc message
+  if msg_count_vc exceeds max_msg_count_vc
 
 */
+
 pub type LCType       = u32;
 pub type NodeType     = u16; //must implement Copy trait
 pub type CRDTNumType  = u16;
+
+pub type IntMultCrdtValue = i32;
+pub type IntMultOpsValue  = i32;
 
 pub mod vector_clock;
 
