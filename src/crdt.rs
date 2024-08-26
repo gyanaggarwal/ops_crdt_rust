@@ -106,11 +106,14 @@ impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone, State> CRDT<CrdtValue, Ops
         self.trcb.add_peer_vcmsg(msg.node, msg.node_vector_clock)
     }
 
-    // use msg_count_cs
     pub fn causally_stable(&mut self) -> Result<(), VectorClockError> {
-        let cs_vc = self.trcb.causally_stable()?;
-        let new_list = message_list::remove_causally_stable(&cs_vc, &self.msg_list)?;
-        self.msg_list = new_list;
+        if self.msg_count_cs >= self.max_msg_count_cs{
+            let cs_vc = self.trcb.causally_stable()?;
+            let new_list = message_list::remove_causally_stable(&cs_vc, &self.msg_list)?;
+            self.msg_list = new_list;
+            self.msg_count_cs = 0;
+        }
+
         Ok(())
     }
 
@@ -124,9 +127,9 @@ impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone, State> CRDT<CrdtValue, Ops
     }
 }
 
-impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone> CRDT<CrdtValue, OpsValue, AddMult> {
-    pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
-        todo!();
+impl CRDT<i32, i32, AddMult> {
+    pub fn process_msg(&mut self, msg: &NodeUpdateMsg<i32>) {
+        self.crdt_value += msg.user_update_msg.ops_instance.ops_value;
     }
 }
 
@@ -154,8 +157,8 @@ impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone> CRDT<CrdtValue, OpsValue, 
     }
 }
 
-impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone> CRDT<CrdtValue, OpsValue, PNCounter> {
-    pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
+impl CRDT<i32, i32, PNCounter> {
+    pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<i32>) {
         todo!()
     }
 }
