@@ -8,7 +8,7 @@ use crate::{CRDTNumType, LCType, NodeType,
             EDFlagCrdtValue, EDFlagOpsValue};
 use crate::trcb;
 use crate::vector_clock::VectorClockError;
-use crate::message_data::{NodeUpdateMsg, NodeVectorClockMsg, SDPOpsType};
+use crate::message_data::{NodeUpdateMsg, NodeVectorClockMsg, SDPOpsType, OpsInstance};
 use crate::message_list;
 use crate::constants::{MAX_MSG_COUNT_CS, MAX_MSG_COUNT_VC, NODE_LIST};
 
@@ -126,6 +126,14 @@ impl CRDT<IntMultCrdtValue, IntMultOpsValue, AddMult> {
     pub fn process_msg(&mut self, msg: &NodeUpdateMsg<i32>) {
         self.crdt_value += msg.user_update_msg.ops_instance.ops_value;
     }
+
+    pub fn get_add_ops(value: IntMultOpsValue) -> OpsInstance<IntMultOpsValue> {
+        OpsInstance::new(SDPOpsType::SDPAdd, value)
+    }
+
+    pub fn get_mult_ops(value: IntMultOpsValue) -> OpsInstance<IntMultOpsValue> {
+        OpsInstance::new(SDPOpsType::SDPMult, value)
+    }
 }
 
 // SDPAdd  - get concurrent SDPMult msgs if empty then disabled
@@ -134,6 +142,14 @@ impl CRDT<IntMultCrdtValue, IntMultOpsValue, AddMult> {
 impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, EWFlag> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<EDFlag>) {
         todo!();
+    }
+
+    pub fn get_add_ops() -> OpsInstance<EDFlagOpsValue> {
+        OpsInstance::new(SDPOpsType::SDPAdd, EDFlag::Disabled)
+    }
+
+    pub fn get_mult_ops() -> OpsInstance<EDFlagOpsValue> {
+        OpsInstance::new(SDPOpsType::SDPMult, EDFlag::Enabled)
     }
 }
 
@@ -144,6 +160,14 @@ impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, DWFlag> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<EDFlag>) {
         todo!();
     }
+
+    pub fn get_add_ops() -> OpsInstance<EDFlagOpsValue> {
+        OpsInstance::new(SDPOpsType::SDPAdd, EDFlag::Enabled)
+    }
+
+    pub fn get_mult_ops() -> OpsInstance<EDFlagOpsValue> {
+        OpsInstance::new(SDPOpsType::SDPMult, EDFlag::Disabled)
+    }
 }
 
 // SDPAdd - get concurrent SDPMult msg with value if empty then remove it
@@ -151,12 +175,28 @@ impl <OpsValue: Clone+PartialEq> CRDT<HashSet<OpsValue>, OpsValue, AWSet> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
         todo!()
     }
+
+    pub fn get_add_ops(value: OpsValue) -> OpsInstance<OpsValue> {
+        OpsInstance::new(SDPOpsType::SDPAdd, value)
+    }
+
+    pub fn get_mult_ops(value: OpsValue) -> OpsInstance<OpsValue> {
+        OpsInstance::new(SDPOpsType::SDPMult, value)
+    }
 }
 
 // SDPAdd - get concurrent SDPMult msg with value if empty then add it
 impl <OpsValue: Clone+PartialEq> CRDT<HashSet<OpsValue>, OpsValue, RWSet> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
         todo!()
+    }
+
+    pub fn get_add_ops(value: OpsValue) -> OpsInstance<OpsValue> {
+        OpsInstance::new(SDPOpsType::SDPAdd, value)
+    }
+
+    pub fn get_mult_ops(value: OpsValue) -> OpsInstance<OpsValue> {
+        OpsInstance::new(SDPOpsType::SDPMult, value)
     }
 }
 
@@ -170,5 +210,13 @@ impl CRDT<PNCounterData, PNCntOpsValue, PNCounter> {
                                    PNCounterData{pcount: self.crdt_value.pcount,
                                                  ncount: self.crdt_value.ncount+msg.user_update_msg.ops_instance.ops_value}
         };
+    }
+
+    pub fn get_add_ops(value: PNCntOpsValue) -> OpsInstance<PNCntOpsValue> {
+        OpsInstance::new(SDPOpsType::SDPAdd, value)
+    }
+
+    pub fn get_mult_ops(value: PNCntOpsValue) -> OpsInstance<PNCntOpsValue> {
+        OpsInstance::new(SDPOpsType::SDPMult, value)
     }
 }
