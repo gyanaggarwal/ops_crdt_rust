@@ -8,9 +8,8 @@ use crate::crdt::CrdtInstance;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum SDPOpsType {
-    SPDNonCommuAdd,
-    SPDNonCommuMult,
-    SPDCommu
+    SDPAdd,
+    SDPMult,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

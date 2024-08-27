@@ -74,7 +74,7 @@ fn test_msg_serde() {
     let vc_msg0 = message_data::NodeVectorClockMsg::new(0, vc000.clone());
     let pn_msg0: message_data::PeerNodeMsg<i32> = message_data::PeerNodeMsg::VectorClockNodeMsg(vc_msg0);
 
-    let ops_instance: OpsInstance<i32> = OpsInstance::new(message_data::SDPOpsType::SPDNonCommuAdd, 10);
+    let ops_instance: OpsInstance<i32> = OpsInstance::new(message_data::SDPOpsType::SDPAdd, 10);
     let crdt_instance = CrdtInstance::new(0, 0, crdt::CrdtType::AddMultCrdt);
     let user_msg: UserUpdateMsg<i32> = message_data::UserUpdateMsg::new(crdt_instance, ops_instance);
     let node_msg1 = message_data::NodeUpdateMsg::new(0, vc010.clone(), user_msg);

@@ -1,12 +1,12 @@
 use std::fmt;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use serde::{Serialize, Deserialize};
 
 use crate::{CRDTNumType, LCType, NodeType, PNCounterOpsValue};
 use crate::trcb;
 use crate::vector_clock::VectorClockError;
-use crate::message_data::{NodeUpdateMsg, NodeVectorClockMsg};
+use crate::message_data::{NodeUpdateMsg, NodeVectorClockMsg, SDPOpsType};
 use crate::message_list;
 use crate::constants::{MAX_MSG_COUNT_CS, MAX_MSG_COUNT_VC, NODE_LIST};
 
@@ -133,32 +133,39 @@ impl CRDT<i32, i32, AddMult> {
     }
 }
 
-impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone> CRDT<CrdtValue, OpsValue, EWFlag> {
-    pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
+impl CRDT<EDFlag, EDFlag, EWFlag> {
+    pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<EDFlag>) {
         todo!();
     }
 }
 
-impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone> CRDT<CrdtValue, OpsValue, DWFlag> {
-    pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
+impl CRDT<EDFlag, EDFlag, DWFlag> {
+    pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<EDFlag>) {
         todo!();
     }
 }
 
-impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone> CRDT<CrdtValue, OpsValue, AWSet> {
+impl <OpsValue: fmt::Display+Clone> CRDT<HashSet<OpsValue>, OpsValue, AWSet> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
         todo!()
     }
 }
 
-impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone> CRDT<CrdtValue, OpsValue, RWSet> {
+impl <OpsValue: fmt::Display+Clone> CRDT<HashSet<OpsValue>, OpsValue, RWSet> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
         todo!()
     }
 }
 
-impl CRDT<i32, i32, PNCounter> {
-    pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<i32>) {
-        todo!()
+impl CRDT<PNCounterData, u32, PNCounter> {
+    pub fn process_msg(&mut self, msg: &NodeUpdateMsg<u32>) {
+        match msg.user_update_msg.ops_instance.ops {
+            SDPOpsType::SDPAdd  => self.crdt_value = 
+                                   PNCounterData{pcount: self.crdt_value.pcount+msg.user_update_msg.ops_instance.ops_value,
+                                                 ncount: self.crdt_value.ncount},
+            SDPOpsType::SDPMult => self.crdt_value = 
+                                   PNCounterData{pcount: self.crdt_value.pcount,
+                                                 ncount: self.crdt_value.ncount+msg.user_update_msg.ops_instance.ops_value}
+        };
     }
 }
