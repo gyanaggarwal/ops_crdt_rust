@@ -5,7 +5,7 @@ use crate::vector_clock::{VectorClock, VectorClockError, VCOrdering};
 use crate::message_data::NodeUpdateMsg;
 use crate::{NodeType, LCType};
 
-pub fn remove_causally_stable<OpsValue: fmt::Display+Clone>(cs_vc: &VectorClock, 
+pub fn remove_causally_stable<OpsValue: fmt::Display+Clone+PartialEq>(cs_vc: &VectorClock, 
     msg_list: &HashMap<(NodeType, LCType), NodeUpdateMsg<OpsValue>>) -> 
     Result<HashMap<(NodeType, LCType), NodeUpdateMsg<OpsValue>>, VectorClockError> {
 

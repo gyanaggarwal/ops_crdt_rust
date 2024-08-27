@@ -43,7 +43,7 @@ impl PNCounterData {
         Self{pcount:0, ncount:0}
     }
 }
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub enum EDFlag {
     Enabled,
     Disabled
@@ -71,7 +71,7 @@ impl CrdtInstance {
 }
 
 #[derive(Debug)]
-pub struct CRDT <CrdtValue: Clone, OpsValue: fmt::Display+Clone, State> {
+pub struct CRDT <CrdtValue: Clone, OpsValue: fmt::Display+Clone+PartialEq, State> {
     pub trcb: trcb::TRCBData,
     pub msg_list: HashMap<(NodeType, LCType), NodeUpdateMsg<OpsValue>>,
     pub crdt_value: CrdtValue,
@@ -82,7 +82,7 @@ pub struct CRDT <CrdtValue: Clone, OpsValue: fmt::Display+Clone, State> {
     pub state: std::marker::PhantomData<State>
 }
 
-impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone, State> CRDT<CrdtValue, OpsValue, State> {
+impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone+PartialEq, State> CRDT<CrdtValue, OpsValue, State> {
     pub fn new(node: NodeType, crdt_value: CrdtValue) -> Result<Self, VectorClockError> {
         let trcb = trcb::TRCBData::new(node, NODE_LIST.to_owned().clone())?;
         let msg_list = HashMap::new();
@@ -154,14 +154,14 @@ impl CRDT<EDFlag, EDFlag, DWFlag> {
 }
 
 // SDPAdd - get concurrent SDPMult msg with value if empty then remove it
-impl <OpsValue: fmt::Display+Clone> CRDT<HashSet<OpsValue>, OpsValue, AWSet> {
+impl <OpsValue: fmt::Display+Clone+PartialEq> CRDT<HashSet<OpsValue>, OpsValue, AWSet> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
         todo!()
     }
 }
 
 // SDPAdd - get concurrent SDPMult msg with value if empty then add it
-impl <OpsValue: fmt::Display+Clone> CRDT<HashSet<OpsValue>, OpsValue, RWSet> {
+impl <OpsValue: fmt::Display+Clone+PartialEq> CRDT<HashSet<OpsValue>, OpsValue, RWSet> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
         todo!()
     }

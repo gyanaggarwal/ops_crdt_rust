@@ -6,7 +6,7 @@ use crate::message_data::{PeerNodeMsg, NodeVectorClockMsg};
 use crate::crdt::CRDT;
 use crate::vector_clock::VectorClockError;
 
-impl <CrdtValue: Clone, OpsValue: Display+Clone, State> CRDT<CrdtValue, OpsValue, State> {
+impl <CrdtValue: Clone, OpsValue: Display+Clone+PartialEq, State> CRDT<CrdtValue, OpsValue, State> {
     pub fn create_peer_msg_list(&self, msg_flag: bool) -> 
         Result<HashMap<NodeType, Vec<PeerNodeMsg<OpsValue>>>, VectorClockError> {
         let mut msg_map = HashMap::<NodeType, Vec<PeerNodeMsg<OpsValue>>>::new();
