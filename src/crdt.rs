@@ -127,30 +127,40 @@ impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone, State> CRDT<CrdtValue, Ops
     }
 }
 
+// SDPAdd - get concurrent SDPMult msgs and add ops_value
+// multiply with SDPAdd value then add it crdt_value
 impl CRDT<i32, i32, AddMult> {
     pub fn process_msg(&mut self, msg: &NodeUpdateMsg<i32>) {
         self.crdt_value += msg.user_update_msg.ops_instance.ops_value;
     }
 }
 
+// SDPAdd  - get concurrent SDPMult msgs if empty then disabled
+// SDPAdd  - disable
+// SDPMutl - enable
 impl CRDT<EDFlag, EDFlag, EWFlag> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<EDFlag>) {
         todo!();
     }
 }
 
+// SDPAdd  - get concurrent SDPMult msgs if empty then enabled
+// SDPAdd  - enable
+// SDPMult - disable
 impl CRDT<EDFlag, EDFlag, DWFlag> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<EDFlag>) {
         todo!();
     }
 }
 
+// SDPAdd - get concurrent SDPMult msg with value if empty then remove it
 impl <OpsValue: fmt::Display+Clone> CRDT<HashSet<OpsValue>, OpsValue, AWSet> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
         todo!()
     }
 }
 
+// SDPAdd - get concurrent SDPMult msg with value if empty then add it
 impl <OpsValue: fmt::Display+Clone> CRDT<HashSet<OpsValue>, OpsValue, RWSet> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
         todo!()

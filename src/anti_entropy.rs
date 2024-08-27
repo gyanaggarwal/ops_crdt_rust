@@ -26,13 +26,10 @@ impl <CrdtValue: Clone, OpsValue: Display+Clone, State> CRDT<CrdtValue, OpsValue
             for (node_key, vc) in node_trcb {
                 for (node_key_vc, lc_vc) in vc.vcmap {
                     if node_key != node_key_vc {
-                        let mut msg_vec1 = msg_vec.clone();
-                        let msg_vec_msg = match msg_map.get(&node_key) {
-                            Some(value) => value,
-                            None => &mut msg_vec1
-                        };
+                        let msg_vec1 = msg_vec.clone();
+                        let msg_vec2 = if let Some(msg_vec2) = msg_map.get(&node_key) {msg_vec2}  else {&msg_vec1};
 
-                        let mut msg_vec_msg1 = msg_vec_msg.clone();
+                        let mut msg_vec3 = msg_vec2.clone();
 
                         let lc0 = self.trcb.node_vector_clock.vcmap.get(&node_key).ok_or(VectorClockError::NodeNotFound)?;
                         for lc1 in lc_vc+1..=*lc0 {
@@ -40,10 +37,10 @@ impl <CrdtValue: Clone, OpsValue: Display+Clone, State> CRDT<CrdtValue, OpsValue
                             let msg = self.msg_list.get(&msg_key).ok_or(VectorClockError::UnexpectedError)?;
                             let msg1 = msg.clone();
 
-                            msg_vec_msg1.push(PeerNodeMsg::UpdateNodeMsg(msg1));
+                            msg_vec3.push(PeerNodeMsg::UpdateNodeMsg(msg1));
                         }
 
-                        msg_map.insert(node_key, msg_vec_msg1);
+                        msg_map.insert(node_key, msg_vec3);
                     }
                 }
             }
