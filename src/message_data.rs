@@ -1,5 +1,3 @@
-use std::fmt::Display;
-
 use serde::{Serialize, Deserialize};
 
 use crate::vector_clock::VectorClock;
@@ -13,11 +11,11 @@ pub enum SDPOpsType {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct OpsInstance <OpsValue: Display+Clone+PartialEq> {
+pub struct OpsInstance <OpsValue: Clone+PartialEq> {
     pub ops: SDPOpsType,
     pub ops_value: OpsValue
 }
-impl <OpsValue: Display+Clone+PartialEq> OpsInstance<OpsValue> {
+impl <OpsValue: Clone+PartialEq> OpsInstance<OpsValue> {
     pub fn new(ops: SDPOpsType, ops_value: OpsValue) -> Self {
         Self {ops, ops_value}
     }
@@ -31,23 +29,23 @@ impl <OpsValue: Display+Clone+PartialEq> OpsInstance<OpsValue> {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct UserUpdateMsg <OpsValue: Display+Clone+PartialEq> {
+pub struct UserUpdateMsg <OpsValue: Clone+PartialEq> {
     pub crdt_instance: CrdtInstance,
     pub ops_instance: OpsInstance<OpsValue>
 }
-impl <OpsValue: Display+Clone+PartialEq> UserUpdateMsg<OpsValue> {
+impl <OpsValue: Clone+PartialEq> UserUpdateMsg<OpsValue> {
     pub fn new(crdt_instance: CrdtInstance, ops_instance: OpsInstance<OpsValue>) -> Self {
         Self {crdt_instance, ops_instance}
     }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct NodeUpdateMsg <OpsValue: Display+Clone+PartialEq> {
+pub struct NodeUpdateMsg <OpsValue: Clone+PartialEq> {
     pub node: NodeType,
     pub node_vector_clock: VectorClock,
     pub user_update_msg: UserUpdateMsg<OpsValue>
 }
-impl <OpsValue: Display+Clone+PartialEq> NodeUpdateMsg<OpsValue> {
+impl <OpsValue: Clone+PartialEq> NodeUpdateMsg<OpsValue> {
     pub fn new(node:NodeType, node_vector_clock: VectorClock, user_update_msg: UserUpdateMsg<OpsValue>) -> Self {
         Self {node, node_vector_clock, user_update_msg}
     }
@@ -65,7 +63,7 @@ impl NodeVectorClockMsg {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub enum PeerNodeMsg <OpsValue: Display+Clone+PartialEq> {
+pub enum PeerNodeMsg <OpsValue: Clone+PartialEq> {
     VectorClockNodeMsg(NodeVectorClockMsg),
     UpdateNodeMsg(NodeUpdateMsg<OpsValue>)
 }

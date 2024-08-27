@@ -1,4 +1,3 @@
-use std::fmt;
 use std::collections::{HashMap, HashSet};
 
 use serde::{Serialize, Deserialize};
@@ -6,7 +5,7 @@ use serde::{Serialize, Deserialize};
 use crate::{CRDTNumType, LCType, NodeType, 
             PNCntOpsValue, 
             IntMultCrdtValue, IntMultOpsValue, 
-            EDFlagCrdtValye, EDFlagOpsValue};
+            EDFlagCrdtValue, EDFlagOpsValue};
 use crate::trcb;
 use crate::vector_clock::VectorClockError;
 use crate::message_data::{NodeUpdateMsg, NodeVectorClockMsg, SDPOpsType};
@@ -51,15 +50,6 @@ pub enum EDFlag {
     Enabled,
     Disabled
 }
-impl fmt::Display for EDFlag {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let printable = match *self {
-            EDFlag::Enabled => "Enabled",
-            EDFlag::Disabled => "Disabled"
-        };
-        write!(f, "{}", printable)
-    }
-}
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CrdtInstance {
@@ -74,7 +64,7 @@ impl CrdtInstance {
 }
 
 #[derive(Debug)]
-pub struct CRDT <CrdtValue: Clone, OpsValue: fmt::Display+Clone+PartialEq, State> {
+pub struct CRDT <CrdtValue: Clone, OpsValue: Clone+PartialEq, State> {
     pub trcb: trcb::TRCBData,
     pub msg_list: HashMap<(NodeType, LCType), NodeUpdateMsg<OpsValue>>,
     pub crdt_value: CrdtValue,
@@ -85,7 +75,7 @@ pub struct CRDT <CrdtValue: Clone, OpsValue: fmt::Display+Clone+PartialEq, State
     pub state: std::marker::PhantomData<State>
 }
 
-impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone+PartialEq, State> CRDT<CrdtValue, OpsValue, State> {
+impl <CrdtValue: Clone, OpsValue: Clone+PartialEq, State> CRDT<CrdtValue, OpsValue, State> {
     pub fn new(node: NodeType, crdt_value: CrdtValue) -> Result<Self, VectorClockError> {
         let trcb = trcb::TRCBData::new(node, NODE_LIST.to_owned().clone())?;
         let msg_list = HashMap::new();
@@ -141,7 +131,7 @@ impl CRDT<IntMultCrdtValue, IntMultOpsValue, AddMult> {
 // SDPAdd  - get concurrent SDPMult msgs if empty then disabled
 // SDPAdd  - disable
 // SDPMutl - enable
-impl CRDT<EDFlagCrdtValye, EDFlagOpsValue, EWFlag> {
+impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, EWFlag> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<EDFlag>) {
         todo!();
     }
@@ -150,21 +140,21 @@ impl CRDT<EDFlagCrdtValye, EDFlagOpsValue, EWFlag> {
 // SDPAdd  - get concurrent SDPMult msgs if empty then enabled
 // SDPAdd  - enable
 // SDPMult - disable
-impl CRDT<EDFlagCrdtValye, EDFlagOpsValue, DWFlag> {
+impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, DWFlag> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<EDFlag>) {
         todo!();
     }
 }
 
 // SDPAdd - get concurrent SDPMult msg with value if empty then remove it
-impl <OpsValue: fmt::Display+Clone+PartialEq> CRDT<HashSet<OpsValue>, OpsValue, AWSet> {
+impl <OpsValue: Clone+PartialEq> CRDT<HashSet<OpsValue>, OpsValue, AWSet> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
         todo!()
     }
 }
 
 // SDPAdd - get concurrent SDPMult msg with value if empty then add it
-impl <OpsValue: fmt::Display+Clone+PartialEq> CRDT<HashSet<OpsValue>, OpsValue, RWSet> {
+impl <OpsValue: Clone+PartialEq> CRDT<HashSet<OpsValue>, OpsValue, RWSet> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
         todo!()
     }

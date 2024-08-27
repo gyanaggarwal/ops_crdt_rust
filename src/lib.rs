@@ -39,7 +39,7 @@ pub type CRDTNumType       = u16;
 
 pub type IntMultCrdtValue  = i32;
 pub type IntMultOpsValue   = i32;
-pub type EDFlagCrdtValye   = EDFlag;
+pub type EDFlagCrdtValue   = EDFlag;
 pub type EDFlagOpsValue    = EDFlag;
 pub type PNCntOpsValue     = u32;
 
