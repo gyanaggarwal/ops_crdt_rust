@@ -33,14 +33,15 @@ crdt.rs
 
 use crdt::EDFlag;
 
-pub type LCType       = u32;
-pub type NodeType     = u16; //must implement Copy trait
-pub type CRDTNumType  = u16;
+pub type LCType            = u32;
+pub type NodeType          = u16; //must implement Copy trait
+pub type CRDTNumType       = u16;
 
 pub type IntMultCrdtValue  = i32;
 pub type IntMultOpsValue   = i32;
+pub type EDFlagCrdtValye   = EDFlag;
 pub type EDFlagOpsValue    = EDFlag;
-pub type PNCounterOpsValue = u32;
+pub type PNCntOpsValue     = u32;
 
 pub mod vector_clock;
 

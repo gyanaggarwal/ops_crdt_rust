@@ -59,10 +59,6 @@ fn test_crdt() {
     }
 }
 
-//fn test_passing_crdt(crdt: CRDT) {
-//    todo!()
-//}
-
 fn test_msg_serde() {
     let node_list = create_node_list();
     let vc000 = vector_clock::VectorClock::new(node_list).unwrap();

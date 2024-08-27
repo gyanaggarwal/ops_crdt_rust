@@ -3,7 +3,10 @@ use std::collections::{HashMap, HashSet};
 
 use serde::{Serialize, Deserialize};
 
-use crate::{CRDTNumType, LCType, NodeType, PNCounterOpsValue};
+use crate::{CRDTNumType, LCType, NodeType, 
+            PNCntOpsValue, 
+            IntMultCrdtValue, IntMultOpsValue, 
+            EDFlagCrdtValye, EDFlagOpsValue};
 use crate::trcb;
 use crate::vector_clock::VectorClockError;
 use crate::message_data::{NodeUpdateMsg, NodeVectorClockMsg, SDPOpsType};
@@ -35,8 +38,8 @@ pub enum CrdtType {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PNCounterData {
-    pcount: PNCounterOpsValue,
-    ncount: PNCounterOpsValue
+    pcount: PNCntOpsValue,
+    ncount: PNCntOpsValue
 }
 impl PNCounterData {
     pub fn new() -> Self {
@@ -129,7 +132,7 @@ impl <CrdtValue: Clone, OpsValue: fmt::Display+Clone+PartialEq, State> CRDT<Crdt
 
 // SDPAdd - get concurrent SDPMult msgs and add ops_value
 // multiply with SDPAdd value then add it crdt_value
-impl CRDT<i32, i32, AddMult> {
+impl CRDT<IntMultCrdtValue, IntMultOpsValue, AddMult> {
     pub fn process_msg(&mut self, msg: &NodeUpdateMsg<i32>) {
         self.crdt_value += msg.user_update_msg.ops_instance.ops_value;
     }
@@ -138,7 +141,7 @@ impl CRDT<i32, i32, AddMult> {
 // SDPAdd  - get concurrent SDPMult msgs if empty then disabled
 // SDPAdd  - disable
 // SDPMutl - enable
-impl CRDT<EDFlag, EDFlag, EWFlag> {
+impl CRDT<EDFlagCrdtValye, EDFlagOpsValue, EWFlag> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<EDFlag>) {
         todo!();
     }
@@ -147,7 +150,7 @@ impl CRDT<EDFlag, EDFlag, EWFlag> {
 // SDPAdd  - get concurrent SDPMult msgs if empty then enabled
 // SDPAdd  - enable
 // SDPMult - disable
-impl CRDT<EDFlag, EDFlag, DWFlag> {
+impl CRDT<EDFlagCrdtValye, EDFlagOpsValue, DWFlag> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<EDFlag>) {
         todo!();
     }
@@ -167,8 +170,8 @@ impl <OpsValue: fmt::Display+Clone+PartialEq> CRDT<HashSet<OpsValue>, OpsValue, 
     }
 }
 
-impl CRDT<PNCounterData, u32, PNCounter> {
-    pub fn process_msg(&mut self, msg: &NodeUpdateMsg<u32>) {
+impl CRDT<PNCounterData, PNCntOpsValue, PNCounter> {
+    pub fn process_msg(&mut self, msg: &NodeUpdateMsg<PNCntOpsValue>) {
         match msg.user_update_msg.ops_instance.ops {
             SDPOpsType::SDPAdd  => self.crdt_value = 
                                    PNCounterData{pcount: self.crdt_value.pcount+msg.user_update_msg.ops_instance.ops_value,
