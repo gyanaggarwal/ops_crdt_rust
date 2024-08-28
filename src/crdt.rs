@@ -9,8 +9,8 @@ use crate::{CRDTNumType, LCType, NodeType,
             IntMultCrdtValue, IntMultOpsValue, 
             EDFlagCrdtValue, EDFlagOpsValue};
 use crate::trcb;
-use crate::vector_clock::VectorClockError;
-use crate::message_data::{NodeUpdateMsg, NodeVectorClockMsg, SDPOpsType, OpsInstance};
+use crate::vector_clock::{self, VCStatus, VectorClockError};
+use crate::message_data::{NodeUpdateMsg, NodeVectorClockMsg, PeerNodeMsg, SDPOpsType, OpsInstance};
 use crate::message_list;
 use crate::constants::{MAX_MSG_COUNT_CS, MAX_MSG_COUNT_VC, NODE_LIST};
 
@@ -97,8 +97,30 @@ impl <CrdtValue: Clone, OpsValue: Clone+PartialEq, State> CRDT<CrdtValue, OpsVal
         Ok(())
     }
 
-    pub fn process_vc_msg(&mut self, msg: NodeVectorClockMsg) -> Result<(), VectorClockError> {
-        self.trcb.add_peer_vcmsg(msg.node, msg.node_vector_clock)
+    pub fn general_process_local_msg(&mut self, msg: NodeUpdateMsg<OpsValue>) -> 
+        Result<HashMap<NodeType, Vec<PeerNodeMsg<OpsValue>>>, VectorClockError> {
+        self.msg_count_vc = 0;
+        self.msg_count_cs += 1;
+        self.add_msg(msg.clone())?;
+        self.causally_stable()?;         
+        self.create_peer_msg_list(true)
+    }
+
+    pub fn general_process_peer_msg(&mut self, msg: NodeUpdateMsg<OpsValue>) -> Result<VCStatus, VectorClockError>  {
+        self.msg_count_vc += 1;
+        let vc_ord = self.trcb.node_vector_clock.cmp_vc(&msg.node_vector_clock)?;
+        let vc_status = vector_clock::peer_vc_status(vc_ord);
+        if vc_status == VCStatus::INORDER {
+            self.max_msg_count_cs += 1;
+            self.add_msg(msg.clone())?;
+            self.trcb.add_peer_vc(msg.node, msg.node_vector_clock.clone())?;
+            self.add_msg(msg.clone())?;
+        }
+        Ok(vc_status)
+    }
+    pub fn general_process_vc_msg(&mut self, msg: NodeVectorClockMsg) -> Result<VCStatus, VectorClockError> {
+        self.trcb.add_peer_vcmsg(msg.node, msg.node_vector_clock.clone())?;
+        Ok(VCStatus::INORDER)
     }
 
     pub fn causally_stable(&mut self) -> Result<(), VectorClockError> {
@@ -108,17 +130,11 @@ impl <CrdtValue: Clone, OpsValue: Clone+PartialEq, State> CRDT<CrdtValue, OpsVal
             self.msg_list = new_list;
             self.msg_count_cs = 0;
         }
-
         Ok(())
     }
 
     pub fn query(&self) -> CrdtValue {
         self.crdt_value.clone()
-    }
-
-    //add vc_msg based on vc_msg_count
-    pub fn send_msg_list(&mut self, _node: NodeType) -> Result<Vec<NodeUpdateMsg<OpsValue>>, VectorClockError> {
-        todo!()
     }
 }
 
@@ -127,7 +143,21 @@ impl <CrdtValue: Clone, OpsValue: Clone+PartialEq, State> CRDT<CrdtValue, OpsVal
 // let sum = a.iter().fold(0, |acc, x| acc + x);
 // option = none
 impl CRDT<IntMultCrdtValue, IntMultOpsValue, AddMult> {
-    pub fn process_msg(&mut self, msg: &NodeUpdateMsg<i32>) -> Result<(), VectorClockError> {
+    pub fn process_local_msg(&mut self, msg: NodeUpdateMsg<IntMultOpsValue>) -> 
+        Result<HashMap<NodeType, Vec<PeerNodeMsg<IntMultOpsValue>>>, VectorClockError> {
+        let msg_map = self.general_process_local_msg(msg.clone())?;
+        self.process_msg(&msg)?;
+        Ok(msg_map)
+    }
+
+    pub fn process_peer_msg(&mut self, pmsg_list: Vec<PeerNodeMsg<IntMultOpsValue>>) ->
+        Result<HashMap<NodeType, Vec<PeerNodeMsg<IntMultOpsValue>>>, VectorClockError> {
+        for _msg in pmsg_list {
+        }
+        todo!()
+    }
+
+    pub fn process_msg(&mut self, msg: &NodeUpdateMsg<IntMultOpsValue>) -> Result<(), VectorClockError> {
         match msg.user_update_msg.ops_instance.ops_type {
             SDPOpsType::SDPAdd  => {let clist 
                                         = message_list::concurrent_msg_list(&msg.node_vector_clock, 
