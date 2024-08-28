@@ -125,8 +125,17 @@ impl <CrdtValue: Clone, OpsValue: Clone+PartialEq, State> CRDT<CrdtValue, OpsVal
 // let sum = a.iter().fold(0, |acc, x| acc + x);
 // option = none
 impl CRDT<IntMultCrdtValue, IntMultOpsValue, AddMult> {
-    pub fn process_msg(&mut self, msg: &NodeUpdateMsg<i32>) {
-        self.crdt_value += msg.user_update_msg.ops_instance.ops_value;
+    pub fn process_msg(&mut self, msg: &NodeUpdateMsg<i32>) -> Result<(), VectorClockError> {
+        match msg.user_update_msg.ops_instance.ops {
+            SDPOpsType::SDPAdd  => {let clist 
+                                        = message_list::concurrent_msg_list(&msg.node_vector_clock, 
+                                                                            &self.msg_list, None)?;
+                                    let m = clist.iter().fold(1, |acc, cmsg| acc*cmsg.user_update_msg.ops_instance.ops_value);
+                                    self.crdt_value += m*msg.user_update_msg.ops_instance.ops_value
+                                   },
+            SDPOpsType::SDPMult => self.crdt_value *= msg.user_update_msg.ops_instance.ops_value
+        };
+        Ok(())
     }
 
     pub fn get_option_value() -> Option<IntMultOpsValue> {
@@ -216,7 +225,7 @@ impl <OpsValue: Clone+PartialEq> CRDT<HashSet<OpsValue>, OpsValue, RWSet> {
     pub fn get_option_value(value: OpsValue) -> Option<OpsValue> {
         Some(value)
     }
-    
+
     pub fn get_add_ops(value: OpsValue) -> OpsInstance<OpsValue> {
         OpsInstance::new(SDPOpsType::SDPAdd, value)
     }
@@ -227,7 +236,7 @@ impl <OpsValue: Clone+PartialEq> CRDT<HashSet<OpsValue>, OpsValue, RWSet> {
 }
 
 impl CRDT<PNCounterData, PNCntOpsValue, PNCounter> {
-    pub fn process_msg(&mut self, msg: &NodeUpdateMsg<PNCntOpsValue>) {
+    pub fn process_msg(&mut self, msg: &NodeUpdateMsg<PNCntOpsValue>) -> Result<(), VectorClockError>{
         match msg.user_update_msg.ops_instance.ops {
             SDPOpsType::SDPAdd  => self.crdt_value = 
                                    PNCounterData{pcount: self.crdt_value.pcount+msg.user_update_msg.ops_instance.ops_value,
@@ -236,6 +245,8 @@ impl CRDT<PNCounterData, PNCntOpsValue, PNCounter> {
                                    PNCounterData{pcount: self.crdt_value.pcount,
                                                  ncount: self.crdt_value.ncount+msg.user_update_msg.ops_instance.ops_value}
         };
+
+        Ok(())
     }
 
     pub fn get_add_ops(value: PNCntOpsValue) -> OpsInstance<PNCntOpsValue> {
@@ -246,3 +257,4 @@ impl CRDT<PNCounterData, PNCntOpsValue, PNCounter> {
         OpsInstance::new(SDPOpsType::SDPMult, value)
     }
 }
+
