@@ -126,7 +126,7 @@ impl <CrdtValue: Clone, OpsValue: Clone+PartialEq, State> CRDT<CrdtValue, OpsVal
 // option = none
 impl CRDT<IntMultCrdtValue, IntMultOpsValue, AddMult> {
     pub fn process_msg(&mut self, msg: &NodeUpdateMsg<i32>) -> Result<(), VectorClockError> {
-        match msg.user_update_msg.ops_instance.ops {
+        match msg.user_update_msg.ops_instance.ops_type {
             SDPOpsType::SDPAdd  => {let clist 
                                         = message_list::concurrent_msg_list(&msg.node_vector_clock, 
                                                                             &self.msg_list, self.get_option_value())?;
@@ -237,7 +237,7 @@ impl <OpsValue: Clone+PartialEq> CRDT<HashSet<OpsValue>, OpsValue, RWSet> {
 
 impl CRDT<PNCounterData, PNCntOpsValue, PNCounter> {
     pub fn process_msg(&mut self, msg: &NodeUpdateMsg<PNCntOpsValue>) -> Result<(), VectorClockError>{
-        match msg.user_update_msg.ops_instance.ops {
+        match msg.user_update_msg.ops_instance.ops_type {
             SDPOpsType::SDPAdd  => self.crdt_value = 
                                    PNCounterData{pcount: self.crdt_value.pcount+msg.user_update_msg.ops_instance.ops_value,
                                                  ncount: self.crdt_value.ncount},

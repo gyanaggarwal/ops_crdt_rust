@@ -12,16 +12,16 @@ pub enum SDPOpsType {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct OpsInstance <OpsValue: Clone+PartialEq> {
-    pub ops: SDPOpsType,
+    pub ops_type: SDPOpsType,
     pub ops_value: OpsValue
 }
 impl <OpsValue: Clone+PartialEq> OpsInstance<OpsValue> {
-    pub fn new(ops: SDPOpsType, ops_value: OpsValue) -> Self {
-        Self {ops, ops_value}
+    pub fn new(ops_type: SDPOpsType, ops_value: OpsValue) -> Self {
+        Self {ops_type, ops_value}
     }
 
     pub fn check(&self, check_value: &Option<OpsValue>) -> bool {
-        self.ops == SDPOpsType::SDPMult && match check_value {
+        self.ops_type == SDPOpsType::SDPMult && match check_value {
                                                     Some(value) => *value == self.ops_value,
                                                     None => true
                                                 }
