@@ -129,7 +129,7 @@ impl CRDT<IntMultCrdtValue, IntMultOpsValue, AddMult> {
         match msg.user_update_msg.ops_instance.ops {
             SDPOpsType::SDPAdd  => {let clist 
                                         = message_list::concurrent_msg_list(&msg.node_vector_clock, 
-                                                                            &self.msg_list, None)?;
+                                                                            &self.msg_list, self.get_option_value())?;
                                     let m = clist.iter().fold(1, |acc, cmsg| acc*cmsg.user_update_msg.ops_instance.ops_value);
                                     self.crdt_value += m*msg.user_update_msg.ops_instance.ops_value
                                    },
@@ -138,15 +138,15 @@ impl CRDT<IntMultCrdtValue, IntMultOpsValue, AddMult> {
         Ok(())
     }
 
-    pub fn get_option_value() -> Option<IntMultOpsValue> {
+    pub fn get_option_value(&self) -> Option<IntMultOpsValue> {
         None
     }
 
-    pub fn get_add_ops(value: IntMultOpsValue) -> OpsInstance<IntMultOpsValue> {
+    pub fn get_add_ops(&self, value: IntMultOpsValue) -> OpsInstance<IntMultOpsValue> {
         OpsInstance::new(SDPOpsType::SDPAdd, value)
     }
 
-    pub fn get_mult_ops(value: IntMultOpsValue) -> OpsInstance<IntMultOpsValue> {
+    pub fn get_mult_ops(&self, value: IntMultOpsValue) -> OpsInstance<IntMultOpsValue> {
         OpsInstance::new(SDPOpsType::SDPMult, value)
     }
 }
@@ -160,15 +160,15 @@ impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, EWFlag> {
         todo!();
     }
 
-    pub fn get_option_value() -> Option<EDFlagOpsValue> {
+    pub fn get_option_value(&self) -> Option<EDFlagOpsValue> {
         Some(EDFlag::Enabled)
     }
 
-    pub fn get_add_ops() -> OpsInstance<EDFlagOpsValue> {
+    pub fn get_add_ops(&self) -> OpsInstance<EDFlagOpsValue> {
         OpsInstance::new(SDPOpsType::SDPAdd, EDFlag::Disabled)
     }
 
-    pub fn get_mult_ops() -> OpsInstance<EDFlagOpsValue> {
+    pub fn get_mult_ops(&self) -> OpsInstance<EDFlagOpsValue> {
         OpsInstance::new(SDPOpsType::SDPMult, EDFlag::Enabled)
     }
 }
@@ -182,15 +182,15 @@ impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, DWFlag> {
         todo!();
     }
 
-    pub fn get_option_value() -> Option<EDFlagOpsValue> {
+    pub fn get_option_value(&self) -> Option<EDFlagOpsValue> {
         Some(EDFlag::Disabled)
     }
 
-    pub fn get_add_ops() -> OpsInstance<EDFlagOpsValue> {
+    pub fn get_add_ops(&self) -> OpsInstance<EDFlagOpsValue> {
         OpsInstance::new(SDPOpsType::SDPAdd, EDFlag::Enabled)
     }
 
-    pub fn get_mult_ops() -> OpsInstance<EDFlagOpsValue> {
+    pub fn get_mult_ops(&self) -> OpsInstance<EDFlagOpsValue> {
         OpsInstance::new(SDPOpsType::SDPMult, EDFlag::Disabled)
     }
 }
@@ -202,15 +202,15 @@ impl <OpsValue: Clone+PartialEq> CRDT<HashSet<OpsValue>, OpsValue, AWSet> {
         todo!()
     }
 
-    pub fn get_option_value(value: OpsValue) -> Option<OpsValue> {
+    pub fn get_option_value(&self, value: OpsValue) -> Option<OpsValue> {
         Some(value)
     }
 
-    pub fn get_add_ops(value: OpsValue) -> OpsInstance<OpsValue> {
+    pub fn get_add_ops(&self, value: OpsValue) -> OpsInstance<OpsValue> {
         OpsInstance::new(SDPOpsType::SDPAdd, value)
     }
 
-    pub fn get_mult_ops(value: OpsValue) -> OpsInstance<OpsValue> {
+    pub fn get_mult_ops(&self, value: OpsValue) -> OpsInstance<OpsValue> {
         OpsInstance::new(SDPOpsType::SDPMult, value)
     }
 }
@@ -222,15 +222,15 @@ impl <OpsValue: Clone+PartialEq> CRDT<HashSet<OpsValue>, OpsValue, RWSet> {
         todo!()
     }
 
-    pub fn get_option_value(value: OpsValue) -> Option<OpsValue> {
+    pub fn get_option_value(&self, value: OpsValue) -> Option<OpsValue> {
         Some(value)
     }
 
-    pub fn get_add_ops(value: OpsValue) -> OpsInstance<OpsValue> {
+    pub fn get_add_ops(&self, value: OpsValue) -> OpsInstance<OpsValue> {
         OpsInstance::new(SDPOpsType::SDPAdd, value)
     }
 
-    pub fn get_mult_ops(value: OpsValue) -> OpsInstance<OpsValue> {
+    pub fn get_mult_ops(&self, value: OpsValue) -> OpsInstance<OpsValue> {
         OpsInstance::new(SDPOpsType::SDPMult, value)
     }
 }
@@ -249,11 +249,11 @@ impl CRDT<PNCounterData, PNCntOpsValue, PNCounter> {
         Ok(())
     }
 
-    pub fn get_add_ops(value: PNCntOpsValue) -> OpsInstance<PNCntOpsValue> {
+    pub fn get_add_ops(&self, value: PNCntOpsValue) -> OpsInstance<PNCntOpsValue> {
         OpsInstance::new(SDPOpsType::SDPAdd, value)
     }
 
-    pub fn get_mult_ops(value: PNCntOpsValue) -> OpsInstance<PNCntOpsValue> {
+    pub fn get_mult_ops(&self, value: PNCntOpsValue) -> OpsInstance<PNCntOpsValue> {
         OpsInstance::new(SDPOpsType::SDPMult, value)
     }
 }
