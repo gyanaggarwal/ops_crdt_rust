@@ -122,9 +122,15 @@ impl <CrdtValue: Clone, OpsValue: Clone+PartialEq, State> CRDT<CrdtValue, OpsVal
 
 // SDPAdd - get concurrent SDPMult msgs and add ops_value
 // multiply with SDPAdd value then add it crdt_value
+// let sum = a.iter().fold(0, |acc, x| acc + x);
+// option = none
 impl CRDT<IntMultCrdtValue, IntMultOpsValue, AddMult> {
     pub fn process_msg(&mut self, msg: &NodeUpdateMsg<i32>) {
         self.crdt_value += msg.user_update_msg.ops_instance.ops_value;
+    }
+
+    pub fn get_option_value() -> Option<IntMultOpsValue> {
+        None
     }
 
     pub fn get_add_ops(value: IntMultOpsValue) -> OpsInstance<IntMultOpsValue> {
@@ -139,9 +145,14 @@ impl CRDT<IntMultCrdtValue, IntMultOpsValue, AddMult> {
 // SDPAdd  - get concurrent SDPMult msgs if empty then disabled
 // SDPAdd  - disable
 // SDPMutl - enable
+// option = Some(enable)
 impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, EWFlag> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<EDFlag>) {
         todo!();
+    }
+
+    pub fn get_option_value() -> Option<EDFlagOpsValue> {
+        Some(EDFlag::Enabled)
     }
 
     pub fn get_add_ops() -> OpsInstance<EDFlagOpsValue> {
@@ -156,9 +167,14 @@ impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, EWFlag> {
 // SDPAdd  - get concurrent SDPMult msgs if empty then enabled
 // SDPAdd  - enable
 // SDPMult - disable
+// option = Some(disable)
 impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, DWFlag> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<EDFlag>) {
         todo!();
+    }
+
+    pub fn get_option_value() -> Option<EDFlagOpsValue> {
+        Some(EDFlag::Disabled)
     }
 
     pub fn get_add_ops() -> OpsInstance<EDFlagOpsValue> {
@@ -171,9 +187,14 @@ impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, DWFlag> {
 }
 
 // SDPAdd - get concurrent SDPMult msg with value if empty then remove it
+// option  = Some(value) of SDPMult
 impl <OpsValue: Clone+PartialEq> CRDT<HashSet<OpsValue>, OpsValue, AWSet> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
         todo!()
+    }
+
+    pub fn get_option_value(value: OpsValue) -> Option<OpsValue> {
+        Some(value)
     }
 
     pub fn get_add_ops(value: OpsValue) -> OpsInstance<OpsValue> {
@@ -186,11 +207,16 @@ impl <OpsValue: Clone+PartialEq> CRDT<HashSet<OpsValue>, OpsValue, AWSet> {
 }
 
 // SDPAdd - get concurrent SDPMult msg with value if empty then add it
+// option = Some(value) of mult
 impl <OpsValue: Clone+PartialEq> CRDT<HashSet<OpsValue>, OpsValue, RWSet> {
     pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
         todo!()
     }
 
+    pub fn get_option_value(value: OpsValue) -> Option<OpsValue> {
+        Some(value)
+    }
+    
     pub fn get_add_ops(value: OpsValue) -> OpsInstance<OpsValue> {
         OpsInstance::new(SDPOpsType::SDPAdd, value)
     }

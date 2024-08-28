@@ -22,6 +22,7 @@ pub fn remove_causally_stable<OpsValue: Clone+PartialEq>
 pub fn concurrent_msg_list<OpsValue: Clone+PartialEq>
     (msg_vc: &VectorClock, msg_list: &HashMap<(NodeType, LCType), NodeUpdateMsg<OpsValue>>, check_value: &Option<OpsValue>) ->
     Result<Vec<NodeUpdateMsg<OpsValue>>, VectorClockError> {
+        
     let mut clist = Vec::new();
 
     for msg in msg_list.values() {
