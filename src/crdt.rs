@@ -1,5 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
+use core::hash::Hash;
+
 use serde::{Serialize, Deserialize};
 
 use crate::{CRDTNumType, LCType, NodeType, 
@@ -156,8 +158,18 @@ impl CRDT<IntMultCrdtValue, IntMultOpsValue, AddMult> {
 // SDPMutl - enable
 // option = Some(enable)
 impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, EWFlag> {
-    pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<EDFlag>) {
-        todo!();
+    pub fn process_msg(&mut self, msg: &NodeUpdateMsg<EDFlag>) -> Result<(), VectorClockError> {
+        match msg.user_update_msg.ops_instance.ops_type {
+            SDPOpsType::SDPAdd  => {let clist 
+                                        = message_list::concurrent_msg_list(&msg.node_vector_clock, 
+                                                                            &self.msg_list, self.get_option_value())?;
+                                    if clist.len() == 0 {
+                                        self.crdt_value = msg.user_update_msg.ops_instance.ops_value.clone();
+                                    }
+                                   },
+            SDPOpsType::SDPMult => self.crdt_value = msg.user_update_msg.ops_instance.ops_value.clone()
+        };
+        Ok(())
     }
 
     pub fn get_option_value(&self) -> Option<EDFlagOpsValue> {
@@ -178,8 +190,18 @@ impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, EWFlag> {
 // SDPMult - disable
 // option = Some(disable)
 impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, DWFlag> {
-    pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<EDFlag>) {
-        todo!();
+    pub fn process_msg(&mut self, msg: &NodeUpdateMsg<EDFlag>) -> Result<(), VectorClockError>{
+        match msg.user_update_msg.ops_instance.ops_type {
+            SDPOpsType::SDPAdd  => {let clist 
+                                        = message_list::concurrent_msg_list(&msg.node_vector_clock, 
+                                                                            &self.msg_list, self.get_option_value())?;
+                                    if clist.len() == 0 {
+                                        self.crdt_value = msg.user_update_msg.ops_instance.ops_value.clone();
+                                    }
+                                   },
+            SDPOpsType::SDPMult => self.crdt_value = msg.user_update_msg.ops_instance.ops_value.clone()
+        };
+        Ok(())
     }
 
     pub fn get_option_value(&self) -> Option<EDFlagOpsValue> {
@@ -197,9 +219,21 @@ impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, DWFlag> {
 
 // SDPAdd - get concurrent SDPMult msg with value if empty then remove it
 // option  = Some(value) of SDPMult
-impl <OpsValue: Clone+PartialEq> CRDT<HashSet<OpsValue>, OpsValue, AWSet> {
-    pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
-        todo!()
+impl <OpsValue: Clone+PartialEq+Eq+Hash> CRDT<HashSet<OpsValue>, OpsValue, AWSet> {
+    pub fn process_msg(&mut self, msg: &NodeUpdateMsg<OpsValue>) -> Result<(), VectorClockError>{
+        let value = msg.user_update_msg.ops_instance.ops_value.clone();
+        match msg.user_update_msg.ops_instance.ops_type {
+            SDPOpsType::SDPAdd  => {let clist 
+                                        = message_list::concurrent_msg_list(&msg.node_vector_clock, 
+                                                                            &self.msg_list, self.get_option_value(value.clone()))?;
+                                    if clist.len() == 0 {
+                                        self.crdt_value.remove(&value);
+                                    };
+                                    true
+                                   }
+            SDPOpsType::SDPMult => self.crdt_value.insert(value.clone())
+        };
+        Ok(())
     }
 
     pub fn get_option_value(&self, value: OpsValue) -> Option<OpsValue> {
@@ -217,9 +251,21 @@ impl <OpsValue: Clone+PartialEq> CRDT<HashSet<OpsValue>, OpsValue, AWSet> {
 
 // SDPAdd - get concurrent SDPMult msg with value if empty then add it
 // option = Some(value) of mult
-impl <OpsValue: Clone+PartialEq> CRDT<HashSet<OpsValue>, OpsValue, RWSet> {
-    pub fn process_msg(&mut self, _msg: &NodeUpdateMsg<OpsValue>) {
-        todo!()
+impl <OpsValue: Clone+PartialEq+Eq+Hash> CRDT<HashSet<OpsValue>, OpsValue, RWSet> {
+    pub fn process_msg(&mut self, msg: &NodeUpdateMsg<OpsValue>)  -> Result<(), VectorClockError>{
+        let value = msg.user_update_msg.ops_instance.ops_value.clone();
+        match msg.user_update_msg.ops_instance.ops_type {
+            SDPOpsType::SDPAdd  => {let clist 
+                                        = message_list::concurrent_msg_list(&msg.node_vector_clock, 
+                                                                            &self.msg_list, self.get_option_value(value.clone()))?;
+                                    if clist.len() == 0 {
+                                        self.crdt_value.insert(value.clone());
+                                    };
+                                    true
+                                   }
+            SDPOpsType::SDPMult => self.crdt_value.remove(&value)
+        };
+        Ok(())
     }
 
     pub fn get_option_value(&self, value: OpsValue) -> Option<OpsValue> {
@@ -245,7 +291,6 @@ impl CRDT<PNCounterData, PNCntOpsValue, PNCounter> {
                                    PNCounterData{pcount: self.crdt_value.pcount,
                                                  ncount: self.crdt_value.ncount+msg.user_update_msg.ops_instance.ops_value}
         };
-
         Ok(())
     }
 
