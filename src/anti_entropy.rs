@@ -11,42 +11,32 @@ impl <CrdtValue: Clone, OpsValue: Clone+PartialEq, State> CRDT<CrdtValue, OpsVal
         let mut msg_map = HashMap::<NodeType, Vec<PeerNodeMsg<OpsValue>>>::new();
         let msg_vec = Vec::<PeerNodeMsg<OpsValue>>::new();
         let vc_flag = !msg_flag && self.msg_count_vc >= self.max_msg_count_vc;
-        let node_trcb = self.trcb.node_trcb.clone();
         if vc_flag || msg_flag {
-            if vc_flag {
-                for node_key in node_trcb.clone().keys() {
+            let node_trcb = self.trcb.node_trcb.clone();
+            for (pnode_key, pvc) in node_trcb {
+                let mut msg_vec1 = msg_vec.clone();
+                if vc_flag {
                     let vc_msg = PeerNodeMsg::VectorClockNodeMsg(NodeVectorClockMsg::new(self.trcb.node, self.trcb.node_vector_clock.clone()));
-                    let mut msg_vec_vc = msg_vec.clone();
-                    msg_vec_vc.push(vc_msg);
-                    msg_map.insert(*node_key, msg_vec_vc);
+                    msg_vec1.push(vc_msg);
                 }
-            } 
 
-            for (node_key, vc) in node_trcb {
-                for (node_key_vc, lc_vc) in vc.vcmap {
-                    if node_key != node_key_vc {
-                        let msg_vec1 = msg_vec.clone();
-                        let msg_vec2 = if let Some(msg_vec2) = msg_map.get(&node_key) {msg_vec2}  else {&msg_vec1};
-
-                        let mut msg_vec3 = msg_vec2.clone();
-
-                        let lc0 = self.trcb.node_vector_clock.vcmap.get(&node_key).ok_or(VectorClockError::NodeNotFound)?;
-                        for lc1 in lc_vc+1..=*lc0 {
-                            let msg_key = (node_key, lc1);
+                for (pvc_node_key, pvc_lc) in pvc.vcmap {
+                    if pnode_key != pvc_node_key {
+                        let lc0 = self.trcb.node_vector_clock.vcmap.get(&pvc_node_key).ok_or(VectorClockError::UnexpectedError)?;
+                        for lc1 in pvc_lc+1..=*lc0 {
+                            let msg_key = (pvc_node_key, lc1);
                             let msg = self.msg_list.get(&msg_key).ok_or(VectorClockError::UnexpectedError)?;
-                            let msg1 = msg.clone();
-
-                            msg_vec3.push(PeerNodeMsg::UpdateNodeMsg(msg1));
+                            let msg = msg.clone();
+                            msg_vec1.push(PeerNodeMsg::UpdateNodeMsg(msg));
                         }
-
-                        msg_map.insert(node_key, msg_vec3);
                     }
                 }
+                msg_map.insert(pnode_key, msg_vec1);
             }
         }
+
         Ok(msg_map)
     }
-    
 }
 /*    
 node0
