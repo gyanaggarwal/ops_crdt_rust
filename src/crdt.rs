@@ -139,9 +139,8 @@ impl <CrdtValue: Clone, OpsValue: Clone+PartialEq, State> CRDT<CrdtValue, OpsVal
 impl CRDT<IntMultCrdtValue, IntMultOpsValue, AddMult> {
     pub fn process_local_msg(&mut self, msg: NodeUpdateMsg<IntMultOpsValue>) -> 
         Result<HashMap<NodeType, Vec<PeerNodeMsg<IntMultOpsValue>>>, VectorClockError> {
-        let msg_map = self.general_process_local_msg(msg.clone())?;
         self.process_msg(&msg)?;
-        Ok(msg_map)
+        self.general_process_local_msg(msg)
     }
 
     pub fn process_peer_msg(&mut self, pmsg_list: Vec<PeerNodeMsg<IntMultOpsValue>>) ->
@@ -193,9 +192,8 @@ impl CRDT<IntMultCrdtValue, IntMultOpsValue, AddMult> {
 impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, EWFlag> {
     pub fn process_local_msg(&mut self, msg: NodeUpdateMsg<EDFlagOpsValue>) -> 
         Result<HashMap<NodeType, Vec<PeerNodeMsg<EDFlagOpsValue>>>, VectorClockError> {
-        let msg_map = self.general_process_local_msg(msg.clone())?;
         self.process_msg(&msg)?;
-        Ok(msg_map)
+        self.general_process_local_msg(msg)
     }
 
     pub fn process_peer_msg(&mut self, pmsg_list: Vec<PeerNodeMsg<EDFlagOpsValue>>) ->
@@ -248,9 +246,8 @@ impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, EWFlag> {
 impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, DWFlag> {
     pub fn process_local_msg(&mut self, msg: NodeUpdateMsg<EDFlagOpsValue>) -> 
         Result<HashMap<NodeType, Vec<PeerNodeMsg<EDFlagOpsValue>>>, VectorClockError> {
-        let msg_map = self.general_process_local_msg(msg.clone())?;
         self.process_msg(&msg)?;
-        Ok(msg_map)
+        self.general_process_local_msg(msg)
     }
 
     pub fn process_peer_msg(&mut self, pmsg_list: Vec<PeerNodeMsg<EDFlagOpsValue>>) ->
@@ -303,10 +300,9 @@ impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, DWFlag> {
 impl <OpsValue: Clone+PartialEq+Eq+Hash> CRDT<HashSet<OpsValue>, OpsValue, AWSet> {
     pub fn process_local_msg(&mut self, msg: NodeUpdateMsg<OpsValue>) -> 
         Result<HashMap<NodeType, Vec<PeerNodeMsg<OpsValue>>>, VectorClockError> {
-        let msg_map = self.general_process_local_msg(msg.clone())?;
         self.process_msg(&msg)?;
-        Ok(msg_map)
-    }
+        self.general_process_local_msg(msg)
+     }
 
     pub fn process_peer_msg(&mut self, pmsg_list: Vec<PeerNodeMsg<OpsValue>>) ->
         Result<HashMap<NodeType, Vec<PeerNodeMsg<OpsValue>>>, VectorClockError> {
@@ -360,10 +356,9 @@ impl <OpsValue: Clone+PartialEq+Eq+Hash> CRDT<HashSet<OpsValue>, OpsValue, AWSet
 impl <OpsValue: Clone+PartialEq+Eq+Hash> CRDT<HashSet<OpsValue>, OpsValue, RWSet> {
     pub fn process_local_msg(&mut self, msg: NodeUpdateMsg<OpsValue>) -> 
         Result<HashMap<NodeType, Vec<PeerNodeMsg<OpsValue>>>, VectorClockError> {
-        let msg_map = self.general_process_local_msg(msg.clone())?;
         self.process_msg(&msg)?;
-        Ok(msg_map)
-    }
+        self.general_process_local_msg(msg)
+     }
 
     pub fn process_peer_msg(&mut self, pmsg_list: Vec<PeerNodeMsg<OpsValue>>) ->
         Result<HashMap<NodeType, Vec<PeerNodeMsg<OpsValue>>>, VectorClockError> {
@@ -417,9 +412,8 @@ impl <OpsValue: Clone+PartialEq+Eq+Hash> CRDT<HashSet<OpsValue>, OpsValue, RWSet
 impl CRDT<PNCounterData, PNCntOpsValue, PNCounter> {
     pub fn process_local_msg(&mut self, msg: NodeUpdateMsg<PNCntOpsValue>) -> 
         Result<HashMap<NodeType, Vec<PeerNodeMsg<PNCntOpsValue>>>, VectorClockError> {
-        let msg_map = self.general_process_local_msg(msg.clone())?;
         self.process_msg(&msg)?;
-        Ok(msg_map)
+        self.general_process_local_msg(msg)
     }
 
     pub fn process_peer_msg(&mut self, pmsg_list: Vec<PeerNodeMsg<PNCntOpsValue>>) ->
