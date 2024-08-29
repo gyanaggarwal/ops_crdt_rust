@@ -1,17 +1,30 @@
-use serde_json;
-use std::collections::HashSet;
+//use serde_json;
+//use std::collections::HashSet;
 use dotenvy::dotenv;
+use ops_crdt_rust::crdt::AddMult;
+use ops_crdt_rust::node_state::Node;
 
-use ops_crdt_rust::crdt::{AWSet, AddMult, CrdtInstance, EDFlag, EWFlag, PNCounter, CRDT, PNCounterData};
-use ops_crdt_rust::message_data::OpsInstance;
-use ops_crdt_rust::message_data::UserUpdateMsg;
-use ops_crdt_rust::vector_clock;
-use ops_crdt_rust::message_data;
-use ops_crdt_rust::crdt;
-use ops_crdt_rust::trcb;
-use ops_crdt_rust::NodeType;
-use ops_crdt_rust::constants::{MAX_MSG_COUNT_CS, MAX_MSG_COUNT_VC, NODE_LIST};
+//use ops_crdt_rust::crdt::{AWSet, AddMult, CrdtInstance, EDFlag, EWFlag, PNCounter, CRDT, PNCounterData};
+//use ops_crdt_rust::message_data::OpsInstance;
+//use ops_crdt_rust::message_data::UserUpdateMsg;
+//use ops_crdt_rust::vector_clock;
+//use ops_crdt_rust::message_data;
+//use ops_crdt_rust::crdt;
+//use ops_crdt_rust::trcb;
+//use ops_crdt_rust::NodeType;
+//use ops_crdt_rust::constants::{MAX_MSG_COUNT_CS, MAX_MSG_COUNT_VC, NODE_LIST};
 
+
+
+fn main() {
+    dotenv().ok();
+
+    let mut node: Node<i32, i32, AddMult> = Node::new();
+    node.populate().unwrap();
+
+    println!("node {:?} {:?}", node, node.get_crdt_instance());
+}
+/*
 fn main() {
     test_vector_clock();
     test_base_trcb();
@@ -167,6 +180,6 @@ fn test_base_trcb() {
     println!("cs {:?}", cs);
 
 }
-
+*/
 
 

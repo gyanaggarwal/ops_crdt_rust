@@ -1,14 +1,3 @@
-/*
-node_instance.rs
-  node
-  node_list
-  map -> (crdt_type, crdt_instance_no) : new crdt_instance_id (node, crdt_type, instance_num)
-  map -> (crdt_instance_id, crdt_instance) : get crdt_instance/create new crdt_instance
-  it will convert user_msg to node_msg by adding vector_clock
-  it will serialize the outgoing messages
-  it will deserialize incoming messages
-*/
-
 use crdt::EDFlag;
 
 pub type LCType            = u32;

@@ -13,11 +13,11 @@ pub struct TRCBData {
 
 impl TRCBData {
     pub fn new(node: NodeType, node_list: Vec<NodeType>) -> Result<Self, VectorClockError> {
-        let node_vector_clock = VectorClock::new(node_list.clone())?;
-
         if !&node_list.contains(&node) {
             return Err(VectorClockError::InconsistentInputTRBC(node, node_list));
         }
+
+        let node_vector_clock = VectorClock::new(node_list.clone())?;
 
         let mut node_trcb = HashMap::new();
 

@@ -9,7 +9,7 @@ use crate::{CRDTNumType, LCType, NodeType,
             IntMultCrdtValue, IntMultOpsValue, 
             EDFlagCrdtValue, EDFlagOpsValue};
 use crate::trcb;
-use crate::vector_clock::{self, VCStatus, VectorClockError};
+use crate::vector_clock::{self, VCStatus, VectorClockError, VectorClock};
 use crate::message_data::{NodeUpdateMsg, NodeVectorClockMsg, PeerNodeMsg, SDPOpsType, OpsInstance};
 use crate::message_list;
 use crate::constants::{MAX_MSG_COUNT_CS, MAX_MSG_COUNT_VC, NODE_LIST};
@@ -89,6 +89,14 @@ impl <CrdtValue: Clone, OpsValue: Clone+PartialEq, State> CRDT<CrdtValue, OpsVal
                 msg_count_vc: 0,
                 msg_count_cs: 0,
                 state: std::marker::PhantomData::<State>})
+    }
+
+    pub fn next_vc(&mut self) -> Result<VectorClock, VectorClockError> {
+        self.trcb.next_vc()
+    }
+
+    pub fn get_node(&self) -> NodeType {
+        self.trcb.node.clone()
     }
 
     pub fn add_msg(&mut self, msg: NodeUpdateMsg<OpsValue>) -> Result<(), VectorClockError> {
