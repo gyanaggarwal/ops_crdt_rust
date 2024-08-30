@@ -9,6 +9,7 @@ pub type IntMultOpsValue   = i32;
 pub type EDFlagCrdtValue   = EDFlag;
 pub type EDFlagOpsValue    = EDFlag;
 pub type PNCntOpsValue     = u32;
+pub type ARSetOpsValue     = i32;
 
 pub mod vector_clock;
 

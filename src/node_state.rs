@@ -37,4 +37,12 @@ impl Node<IntMultCrdtValue, IntMultOpsValue, AddMult> {
     pub fn get_crdt_instance(&self) -> CrdtInstance {
         self.crdt_instance.clone()
     }
+
+    pub fn get_crdt(&mut self, node: u16) -> &CRDT<IntMultCrdtValue, IntMultOpsValue, AddMult> {
+        self.crdt_list.get(&node).unwrap()
+    }
+
+    pub fn get_crdt_len(&self) -> u16 {
+        self.node_list.len() as u16
+    }
 }

@@ -1,5 +1,7 @@
 //use serde_json;
 //use std::collections::HashSet;
+use rand::prelude::*;
+
 use dotenvy::dotenv;
 use ops_crdt_rust::crdt::AddMult;
 use ops_crdt_rust::node_state::Node;
@@ -22,7 +24,26 @@ fn main() {
     let mut node: Node<i32, i32, AddMult> = Node::new();
     node.populate().unwrap();
 
-    println!("node {:?} {:?}", node, node.get_crdt_instance());
+    let clen = node.get_crdt_len();
+    let crdt_index = get_crdt_index(clen);
+    let crdt = node.get_crdt(crdt_index);
+    let ops_index = get_ops_index();
+    let ops_value = get_rand(1, 20) as i32;
+    let ops_instance = if ops_index == 0 {crdt.get_add_ops(ops_value)} else {crdt.get_mult_ops(ops_value)};
+    
+    println!("crdt {}, {:?}, {:?}", crdt_index, crdt, ops_instance);
+}
+
+fn get_ops_index() -> u16 {
+    get_rand(0,1)
+}
+
+fn get_crdt_index(high: u16) -> u16 {
+    get_rand(0, high-1)
+}
+
+fn get_rand(low: u16, high: u16) -> u16 {
+    rand::thread_rng().gen_range(low..=high)
 }
 /*
 fn main() {

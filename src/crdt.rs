@@ -1,16 +1,24 @@
 use std::collections::{HashMap, HashSet};
 
-use core::hash::Hash;
-
 use serde::{Serialize, Deserialize};
 
-use crate::{CRDTNumType, LCType, NodeType, 
-            PNCntOpsValue, 
-            IntMultCrdtValue, IntMultOpsValue, 
-            EDFlagCrdtValue, EDFlagOpsValue};
+use crate::{ARSetOpsValue, 
+            EDFlagCrdtValue, 
+            EDFlagOpsValue, 
+            IntMultCrdtValue, 
+            IntMultOpsValue, 
+            PNCntOpsValue,
+            LCType, 
+            NodeType, 
+            CRDTNumType};
 use crate::trcb;
-use crate::vector_clock::{self, VCStatus, VectorClockError, VectorClock};
-use crate::message_data::{NodeUpdateMsg, NodeVectorClockMsg, PeerNodeMsg, SDPOpsType, OpsInstance};
+use crate::vector_clock::{VCStatus, VectorClockError, VectorClock, peer_vc_status};
+use crate::message_data::{NodeUpdateMsg, 
+                          NodeVectorClockMsg, 
+                          PeerNodeMsg, 
+                          SDPOpsType, 
+                          OpsInstance, 
+                          UserUpdateMsg};
 use crate::message_list;
 use crate::constants::{MAX_MSG_COUNT_CS, MAX_MSG_COUNT_VC, NODE_LIST};
 
@@ -99,6 +107,13 @@ impl <CrdtValue: Clone, OpsValue: Clone+PartialEq, State> CRDT<CrdtValue, OpsVal
         self.trcb.node.clone()
     }
 
+    pub fn create_local_msg(&mut self, user_update_msg: UserUpdateMsg<OpsValue>) -> 
+        Result<NodeUpdateMsg<OpsValue>, VectorClockError> {
+        let node = self.get_node();
+        let node_vector_clock = self.next_vc()?.clone();
+        Ok(NodeUpdateMsg::new(node, node_vector_clock, user_update_msg))
+    }
+
     pub fn add_msg(&mut self, msg: NodeUpdateMsg<OpsValue>) -> Result<(), VectorClockError> {
         let lc = msg.node_vector_clock.vcmap.get(&msg.node).ok_or(VectorClockError::NodeNotFound)?;
         self.msg_list.insert((msg.node, lc.clone()), msg);
@@ -117,7 +132,7 @@ impl <CrdtValue: Clone, OpsValue: Clone+PartialEq, State> CRDT<CrdtValue, OpsVal
     pub fn general_process_peer_msg(&mut self, msg: NodeUpdateMsg<OpsValue>) -> Result<VCStatus, VectorClockError>  {
         self.msg_count_vc += 1;
         let vc_ord = self.trcb.node_vector_clock.cmp_vc(&msg.node_vector_clock)?;
-        let vc_status = vector_clock::peer_vc_status(vc_ord);
+        let vc_status = peer_vc_status(vc_ord);
         if vc_status == VCStatus::INORDER {
             self.max_msg_count_cs += 1;
             self.add_msg(msg.clone())?;
@@ -305,15 +320,15 @@ impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, DWFlag> {
     }
 }
 
-impl <OpsValue: Clone+PartialEq+Eq+Hash> CRDT<HashSet<OpsValue>, OpsValue, AWSet> {
-    pub fn process_local_msg(&mut self, msg: NodeUpdateMsg<OpsValue>) -> 
-        Result<HashMap<NodeType, Vec<PeerNodeMsg<OpsValue>>>, VectorClockError> {
+impl CRDT<HashSet<ARSetOpsValue>, ARSetOpsValue, AWSet> {
+    pub fn process_local_msg(&mut self, msg: NodeUpdateMsg<ARSetOpsValue>) -> 
+        Result<HashMap<NodeType, Vec<PeerNodeMsg<ARSetOpsValue>>>, VectorClockError> {
         self.process_msg(&msg)?;
         self.general_process_local_msg(msg)
      }
 
-    pub fn process_peer_msg(&mut self, pmsg_list: Vec<PeerNodeMsg<OpsValue>>) ->
-        Result<HashMap<NodeType, Vec<PeerNodeMsg<OpsValue>>>, VectorClockError> {
+    pub fn process_peer_msg(&mut self, pmsg_list: Vec<PeerNodeMsg<ARSetOpsValue>>) ->
+        Result<HashMap<NodeType, Vec<PeerNodeMsg<ARSetOpsValue>>>, VectorClockError> {
         for msg in pmsg_list {
             match msg {
                 PeerNodeMsg::VectorClockNodeMsg(vmsg)   =>  self.general_process_vc_msg(vmsg)?,
@@ -332,7 +347,7 @@ impl <OpsValue: Clone+PartialEq+Eq+Hash> CRDT<HashSet<OpsValue>, OpsValue, AWSet
         Ok(msg_list)
     }
 
-    pub fn process_msg(&mut self, msg: &NodeUpdateMsg<OpsValue>) -> Result<(), VectorClockError>{
+    pub fn process_msg(&mut self, msg: &NodeUpdateMsg<ARSetOpsValue>) -> Result<(), VectorClockError>{
         let value = msg.user_update_msg.ops_instance.ops_value.clone();
         match msg.user_update_msg.ops_instance.ops_type {
             SDPOpsType::SDPAdd  =>  {   let clist 
@@ -348,28 +363,28 @@ impl <OpsValue: Clone+PartialEq+Eq+Hash> CRDT<HashSet<OpsValue>, OpsValue, AWSet
         Ok(())
     }
 
-    pub fn get_option_value(&self, value: OpsValue) -> Option<OpsValue> {
+    pub fn get_option_value(&self, value: ARSetOpsValue) -> Option<ARSetOpsValue> {
         Some(value)
     }
 
-    pub fn get_add_ops(&self, value: OpsValue) -> OpsInstance<OpsValue> {
+    pub fn get_add_ops(&self, value: ARSetOpsValue) -> OpsInstance<ARSetOpsValue> {
         OpsInstance::new(SDPOpsType::SDPAdd, value)
     }
 
-    pub fn get_mult_ops(&self, value: OpsValue) -> OpsInstance<OpsValue> {
+    pub fn get_mult_ops(&self, value: ARSetOpsValue) -> OpsInstance<ARSetOpsValue> {
         OpsInstance::new(SDPOpsType::SDPMult, value)
     }
 }
 
-impl <OpsValue: Clone+PartialEq+Eq+Hash> CRDT<HashSet<OpsValue>, OpsValue, RWSet> {
-    pub fn process_local_msg(&mut self, msg: NodeUpdateMsg<OpsValue>) -> 
-        Result<HashMap<NodeType, Vec<PeerNodeMsg<OpsValue>>>, VectorClockError> {
+impl CRDT<HashSet<ARSetOpsValue>, ARSetOpsValue, RWSet> {
+    pub fn process_local_msg(&mut self, msg: NodeUpdateMsg<ARSetOpsValue>) -> 
+        Result<HashMap<NodeType, Vec<PeerNodeMsg<ARSetOpsValue>>>, VectorClockError> {
         self.process_msg(&msg)?;
         self.general_process_local_msg(msg)
      }
 
-    pub fn process_peer_msg(&mut self, pmsg_list: Vec<PeerNodeMsg<OpsValue>>) ->
-        Result<HashMap<NodeType, Vec<PeerNodeMsg<OpsValue>>>, VectorClockError> {
+    pub fn process_peer_msg(&mut self, pmsg_list: Vec<PeerNodeMsg<ARSetOpsValue>>) ->
+        Result<HashMap<NodeType, Vec<PeerNodeMsg<ARSetOpsValue>>>, VectorClockError> {
         for msg in pmsg_list {
             match msg {
                 PeerNodeMsg::VectorClockNodeMsg(vmsg)   =>  self.general_process_vc_msg(vmsg)?,
@@ -388,7 +403,7 @@ impl <OpsValue: Clone+PartialEq+Eq+Hash> CRDT<HashSet<OpsValue>, OpsValue, RWSet
         Ok(msg_list)
     }
 
-    pub fn process_msg(&mut self, msg: &NodeUpdateMsg<OpsValue>)  -> Result<(), VectorClockError>{
+    pub fn process_msg(&mut self, msg: &NodeUpdateMsg<ARSetOpsValue>)  -> Result<(), VectorClockError>{
         let value = msg.user_update_msg.ops_instance.ops_value.clone();
         match msg.user_update_msg.ops_instance.ops_type {
             SDPOpsType::SDPAdd  =>  {   let clist 
@@ -404,15 +419,15 @@ impl <OpsValue: Clone+PartialEq+Eq+Hash> CRDT<HashSet<OpsValue>, OpsValue, RWSet
         Ok(())
     }
 
-    pub fn get_option_value(&self, value: OpsValue) -> Option<OpsValue> {
+    pub fn get_option_value(&self, value: ARSetOpsValue) -> Option<ARSetOpsValue> {
         Some(value)
     }
 
-    pub fn get_add_ops(&self, value: OpsValue) -> OpsInstance<OpsValue> {
+    pub fn get_add_ops(&self, value: ARSetOpsValue) -> OpsInstance<ARSetOpsValue> {
         OpsInstance::new(SDPOpsType::SDPAdd, value)
     }
 
-    pub fn get_mult_ops(&self, value: OpsValue) -> OpsInstance<OpsValue> {
+    pub fn get_mult_ops(&self, value: ARSetOpsValue) -> OpsInstance<ARSetOpsValue> {
         OpsInstance::new(SDPOpsType::SDPMult, value)
     }
 }
