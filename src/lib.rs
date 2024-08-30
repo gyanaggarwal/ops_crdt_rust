@@ -23,6 +23,8 @@ pub mod anti_entropy;
 
 pub mod node_state;
 
+pub mod node_instance;
+
 pub mod crdt;
 
 pub mod constants;

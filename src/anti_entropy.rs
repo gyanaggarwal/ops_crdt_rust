@@ -20,14 +20,16 @@ impl <CrdtValue: Clone, OpsValue: Clone+PartialEq, State> CRDT<CrdtValue, OpsVal
                     msg_vec1.push(vc_msg);
                 }
 
-                for (pvc_node_key, pvc_lc) in pvc.vcmap {
-                    if pnode_key != pvc_node_key {
-                        let lc0 = self.trcb.node_vector_clock.vcmap.get(&pvc_node_key).ok_or(VectorClockError::UnexpectedError)?;
-                        for lc1 in pvc_lc+1..=*lc0 {
-                            let msg_key = (pvc_node_key, lc1);
-                            let msg = self.msg_list.get(&msg_key).ok_or(VectorClockError::UnexpectedError)?;
-                            let msg = msg.clone();
-                            msg_vec1.push(PeerNodeMsg::UpdateNodeMsg(msg));
+                if msg_flag {
+                    for (pvc_node_key, pvc_lc) in pvc.vcmap {
+                        if pnode_key != pvc_node_key {
+                            let lc0 = self.trcb.node_vector_clock.vcmap.get(&pvc_node_key).ok_or(VectorClockError::UnexpectedError)?;
+                            for lc1 in pvc_lc+1..=*lc0 {
+                                let msg_key = (pvc_node_key, lc1);
+                                let msg = self.msg_list.get(&msg_key).ok_or(VectorClockError::UnexpectedError)?;
+                                let msg = msg.clone();
+                                msg_vec1.push(PeerNodeMsg::UpdateNodeMsg(msg));
+                            }
                         }
                     }
                 }
