@@ -23,23 +23,23 @@ fn main() {
     let ops_value = get_rand(1, 20) as i32;
     let ops_instance = if ops_index == 0 {ni0.get_add_ops_add_mult(ops_value)} else {ni0.get_mult_ops_add_mult(ops_value)};
     let user_update_msg = UserUpdateMsg::new(crdt_instance, ops_instance);
-    let result = ni0.process_local_msg(user_update_msg.clone()).unwrap();
+    let result = ni0.process_local_msg_add_mult(user_update_msg.clone()).unwrap();
 
     for (pnode, pmsg_list) in result {
         let _ = match pnode {
-            0 => ni0.process_peer_msg(pmsg_list),
-            1 => ni1.process_peer_msg(pmsg_list),
-            2 => ni2.process_peer_msg(pmsg_list),
+            0 => ni0.process_peer_msg_add_mult(pmsg_list),
+            1 => ni1.process_peer_msg_add_mult(pmsg_list),
+            2 => ni2.process_peer_msg_add_mult(pmsg_list),
             _ => panic!()};
      }
 
     println!("msg    => {:?}", user_update_msg);
     println!("\n\n");
-    println!("ni0    => {:?}", ni0);
+    println!("ni0    => {:?}", ni0.add_mult_crdt);
     println!("\n\n");
-    println!("ni1    => {:?}", ni1);
+    println!("ni1    => {:?}", ni1.add_mult_crdt);
     println!("\n\n");
-    println!("ni2    => {:?}", ni2);
+    println!("ni2    => {:?}", ni2.add_mult_crdt);
 }
 
 

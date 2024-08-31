@@ -35,13 +35,13 @@ impl NodeInstance {
         Ok(Self{node, add_mult_crdt, ewflag_crdt, dwflag_crdt, awset_crdt, rwset_crdt, pncnt_crdt})
     }
 
-    pub fn process_local_msg(&mut self, user_update_msg: UserUpdateMsg<IntMultOpsValue>) ->
+    pub fn process_local_msg_add_mult(&mut self, user_update_msg: UserUpdateMsg<IntMultOpsValue>) ->
         Result<HashMap<NodeType, Vec<PeerNodeMsg<IntMultOpsValue>>>, VectorClockError> {
         let node_update_msg = self.add_mult_crdt.create_local_msg(user_update_msg)?;
         self.add_mult_crdt.process_local_msg(node_update_msg)
     }
 
-    pub fn process_peer_msg(&mut self, pmsg_list: Vec<PeerNodeMsg<IntMultOpsValue>>) ->
+    pub fn process_peer_msg_add_mult(&mut self, pmsg_list: Vec<PeerNodeMsg<IntMultOpsValue>>) ->
         Result<HashMap<NodeType, Vec<PeerNodeMsg<IntMultOpsValue>>>, VectorClockError> {
         self.add_mult_crdt.process_peer_msg(pmsg_list)
     }
