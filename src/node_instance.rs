@@ -6,17 +6,12 @@ use crate::{NodeType,
             EDFlagCrdtValue, EDFlagOpsValue,
             ARSetOpsValue,
             PNCntOpsValue};
-use crate::crdt::{CRDT,
-                  EDFlag,
-                  PNCounterData,
-                  AddMult, 
-                  EWFlag,
-                  DWFlag,
-                  AWSet,
-                  RWSet,
-                  PNCounter};
+use crate::crdt::CRDT;
+use crate::pncnt_crdt::{PNCounter, PNCounterData};
+use crate::arset_crdt::{AWSet, RWSet};
 use crate::vector_clock::VectorClockError;
-
+use crate::edflag_crdt::{EDFlag, EWFlag, DWFlag};
+use crate::add_mult_crdt::AddMult;
 
 #[derive(Debug)]
 pub struct NodeInstance {
@@ -56,7 +51,7 @@ impl NodeInstance {
     }
 
     pub fn get_mult_ops_add_mult(&self, value: IntMultOpsValue) -> OpsInstance<IntMultOpsValue> {
-        self.add_mult_crdt.get_add_ops(value)
+        self.add_mult_crdt.get_mult_ops(value)
     }
 
     pub fn get_add_ops_ewflag(&self) -> OpsInstance<EDFlagOpsValue> {
@@ -64,7 +59,7 @@ impl NodeInstance {
     }
 
     pub fn get_mult_ops_ewflag(&self) -> OpsInstance<EDFlagOpsValue> {
-        self.ewflag_crdt.get_add_ops()
+        self.ewflag_crdt.get_mult_ops()
     }
 
     pub fn get_add_ops_dwflag(&self) -> OpsInstance<EDFlagOpsValue> {
@@ -72,7 +67,7 @@ impl NodeInstance {
     }
 
     pub fn get_mult_ops_dwflag(&self) -> OpsInstance<EDFlagOpsValue> {
-        self.dwflag_crdt.get_add_ops()
+        self.dwflag_crdt.get_mult_ops()
     }
 
     pub fn get_add_ops_awset(&self, value: ARSetOpsValue) -> OpsInstance<ARSetOpsValue> {
@@ -80,7 +75,7 @@ impl NodeInstance {
     }
 
     pub fn get_mult_ops_awset(&self, value: ARSetOpsValue) -> OpsInstance<ARSetOpsValue> {
-        self.awset_crdt.get_add_ops(value)
+        self.awset_crdt.get_mult_ops(value)
     }
 
     pub fn get_add_ops_rwset(&self, value: ARSetOpsValue) -> OpsInstance<ARSetOpsValue> {
@@ -88,7 +83,7 @@ impl NodeInstance {
     }
 
     pub fn get_mult_ops_rwset(&self, value: ARSetOpsValue) -> OpsInstance<ARSetOpsValue> {
-        self.rwset_crdt.get_add_ops(value)
+        self.rwset_crdt.get_mult_ops(value)
     }
 
     pub fn get_add_ops_pncnt(&self, value: PNCntOpsValue) -> OpsInstance<PNCntOpsValue> {
@@ -96,6 +91,6 @@ impl NodeInstance {
     }
 
     pub fn get_mult_ops_pncnt(&self, value: PNCntOpsValue) -> OpsInstance<PNCntOpsValue> {
-        self.pncnt_crdt.get_add_ops(value)
+        self.pncnt_crdt.get_mult_ops(value)
     }
 }

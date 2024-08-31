@@ -1,4 +1,4 @@
-use crdt::EDFlag;
+use edflag_crdt::EDFlag;
 
 pub type LCType            = u32;
 pub type NodeType          = u16; //must implement Copy trait
@@ -26,6 +26,14 @@ pub mod node_state;
 pub mod node_instance;
 
 pub mod crdt;
+
+pub mod add_mult_crdt;
+
+pub mod edflag_crdt;
+
+pub mod arset_crdt;
+
+pub mod pncnt_crdt;
 
 pub mod constants;
 
