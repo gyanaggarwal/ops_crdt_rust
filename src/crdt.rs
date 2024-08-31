@@ -142,7 +142,9 @@ impl <CrdtValue: Clone, OpsValue: Clone+PartialEq, State> CRDT<CrdtValue, OpsVal
         Ok(vc_status)
     }
     pub fn general_process_vc_msg(&mut self, msg: NodeVectorClockMsg) -> Result<(), VectorClockError> {
-        self.trcb.add_peer_vcmsg(msg.node, msg.node_vector_clock.clone())
+        self.trcb.add_peer_vcmsg(msg.node, msg.node_vector_clock.clone())?;
+        self.msg_count_cs += 1;
+        self.causally_stable()
     }
 
     pub fn causally_stable(&mut self) -> Result<(), VectorClockError> {
@@ -171,12 +173,14 @@ impl CRDT<IntMultCrdtValue, IntMultOpsValue, AddMult> {
         Result<HashMap<NodeType, Vec<PeerNodeMsg<IntMultOpsValue>>>, VectorClockError> {
         for msg in pmsg_list {
             match msg {
-                PeerNodeMsg::VectorClockNodeMsg(vmsg)   =>  self.general_process_vc_msg(vmsg)?,
-                PeerNodeMsg::UpdateNodeMsg(umsg)        =>  {   let vc_status = self.general_process_peer_msg(umsg.clone())?;
-                                                                                    if vc_status == VCStatus::INORDER {
-                                                                                        self.process_msg(&umsg)?
-                                                                                    }
-                                                                                }
+                PeerNodeMsg::VectorClockNodeMsg(vmsg) =>  
+                    self.general_process_vc_msg(vmsg)?,
+                PeerNodeMsg::UpdateNodeMsg(umsg)      =>  
+                    {   let vc_status = self.general_process_peer_msg(umsg.clone())?;
+                        if vc_status == VCStatus::INORDER {
+                            self.process_msg(&umsg)?
+                        }
+                    }
             }
         }
         self.causally_stable()?;
@@ -191,8 +195,11 @@ impl CRDT<IntMultCrdtValue, IntMultOpsValue, AddMult> {
         match msg.user_update_msg.ops_instance.ops_type {
             SDPOpsType::SDPAdd  =>  {   let clist 
                                             = message_list::concurrent_msg_list(&msg.node_vector_clock, 
-                                                                        &self.msg_list, self.get_option_value())?;
-                                        let m = clist.iter().fold(1, |acc, cmsg| acc*cmsg.user_update_msg.ops_instance.ops_value);
+                                                    &self.msg_list, self.get_option_value())?;
+                                        let m = clist.iter()
+                                                        .fold(1, 
+                                                           |acc, cmsg| 
+                                                              acc*cmsg.user_update_msg.ops_instance.ops_value);
                                         self.crdt_value += m*msg.user_update_msg.ops_instance.ops_value
                                     },
             SDPOpsType::SDPMult =>  self.crdt_value *= msg.user_update_msg.ops_instance.ops_value
@@ -224,12 +231,14 @@ impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, EWFlag> {
         Result<HashMap<NodeType, Vec<PeerNodeMsg<EDFlagOpsValue>>>, VectorClockError> {
         for msg in pmsg_list {
             match msg {
-                PeerNodeMsg::VectorClockNodeMsg(vmsg)   =>  self.general_process_vc_msg(vmsg)?,
-                PeerNodeMsg::UpdateNodeMsg(umsg)     =>  {   let vc_status = self.general_process_peer_msg(umsg.clone())?;
-                                                                                    if vc_status == VCStatus::INORDER {
-                                                                                        self.process_msg(&umsg)?
-                                                                                    }
-                                                                                }
+                PeerNodeMsg::VectorClockNodeMsg(vmsg) =>  
+                    self.general_process_vc_msg(vmsg)?,
+                PeerNodeMsg::UpdateNodeMsg(umsg)   =>  
+                    {   let vc_status = self.general_process_peer_msg(umsg.clone())?;
+                        if vc_status == VCStatus::INORDER {
+                                                            self.process_msg(&umsg)?
+                                                          }
+                    }
             }
         }
         self.causally_stable()?;
@@ -244,7 +253,7 @@ impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, EWFlag> {
         match msg.user_update_msg.ops_instance.ops_type {
             SDPOpsType::SDPAdd  =>      {   let clist 
                                                 = message_list::concurrent_msg_list(&msg.node_vector_clock, 
-                                                                        &self.msg_list, self.get_option_value())?;
+                                                    &self.msg_list, self.get_option_value())?;
                                             if clist.len() == 0 {
                                                 self.crdt_value = msg.user_update_msg.ops_instance.ops_value.clone();
                                             }
@@ -278,12 +287,14 @@ impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, DWFlag> {
         Result<HashMap<NodeType, Vec<PeerNodeMsg<EDFlagOpsValue>>>, VectorClockError> {
         for msg in pmsg_list {
             match msg {
-                PeerNodeMsg::VectorClockNodeMsg(vmsg)   =>  self.general_process_vc_msg(vmsg)?,
-                PeerNodeMsg::UpdateNodeMsg(umsg)     =>  {   let vc_status = self.general_process_peer_msg(umsg.clone())?;
-                                                                                    if vc_status == VCStatus::INORDER {
-                                                                                        self.process_msg(&umsg)?
-                                                                                    }
-                                                                                }
+                PeerNodeMsg::VectorClockNodeMsg(vmsg) =>  
+                    self.general_process_vc_msg(vmsg)?,
+                PeerNodeMsg::UpdateNodeMsg(umsg)   =>  
+                    {   let vc_status = self.general_process_peer_msg(umsg.clone())?;
+                        if vc_status == VCStatus::INORDER {
+                                                            self.process_msg(&umsg)?
+                                                          }
+                    }
             }
         }
         self.causally_stable()?;
@@ -298,7 +309,7 @@ impl CRDT<EDFlagCrdtValue, EDFlagOpsValue, DWFlag> {
         match msg.user_update_msg.ops_instance.ops_type {
             SDPOpsType::SDPAdd  =>  {   let clist 
                                             = message_list::concurrent_msg_list(&msg.node_vector_clock, 
-                                                                            &self.msg_list, self.get_option_value())?;
+                                                    &self.msg_list, self.get_option_value())?;
                                         if clist.len() == 0 {
                                             self.crdt_value = msg.user_update_msg.ops_instance.ops_value.clone();
                                         }
@@ -332,12 +343,14 @@ impl CRDT<HashSet<ARSetOpsValue>, ARSetOpsValue, AWSet> {
         Result<HashMap<NodeType, Vec<PeerNodeMsg<ARSetOpsValue>>>, VectorClockError> {
         for msg in pmsg_list {
             match msg {
-                PeerNodeMsg::VectorClockNodeMsg(vmsg)   =>  self.general_process_vc_msg(vmsg)?,
-                PeerNodeMsg::UpdateNodeMsg(umsg)   =>  {   let vc_status = self.general_process_peer_msg(umsg.clone())?;
-                                                                                    if vc_status == VCStatus::INORDER {
-                                                                                        self.process_msg(&umsg)?
-                                                                                    }
-                                                                                }
+                PeerNodeMsg::VectorClockNodeMsg(vmsg) =>  
+                    self.general_process_vc_msg(vmsg)?,
+                PeerNodeMsg::UpdateNodeMsg(umsg)      =>  
+                    {   let vc_status = self.general_process_peer_msg(umsg.clone())?;
+                        if vc_status == VCStatus::INORDER {
+                                                            self.process_msg(&umsg)?
+                                                          }
+                    }
             }
         }
         self.causally_stable()?;
@@ -353,7 +366,7 @@ impl CRDT<HashSet<ARSetOpsValue>, ARSetOpsValue, AWSet> {
         match msg.user_update_msg.ops_instance.ops_type {
             SDPOpsType::SDPAdd  =>  {   let clist 
                                             = message_list::concurrent_msg_list(&msg.node_vector_clock, 
-                                                                            &self.msg_list, self.get_option_value(value.clone()))?;
+                                                    &self.msg_list, self.get_option_value(value.clone()))?;
                                         if clist.len() == 0 {
                                             self.crdt_value.remove(&value);
                                         };
@@ -388,12 +401,14 @@ impl CRDT<HashSet<ARSetOpsValue>, ARSetOpsValue, RWSet> {
         Result<HashMap<NodeType, Vec<PeerNodeMsg<ARSetOpsValue>>>, VectorClockError> {
         for msg in pmsg_list {
             match msg {
-                PeerNodeMsg::VectorClockNodeMsg(vmsg)   =>  self.general_process_vc_msg(vmsg)?,
-                PeerNodeMsg::UpdateNodeMsg(umsg)   =>  {   let vc_status = self.general_process_peer_msg(umsg.clone())?;
-                                                                                        if vc_status == VCStatus::INORDER {
-                                                                                            self.process_msg(&umsg)?
-                                                                                        }
-                                                                                }
+                PeerNodeMsg::VectorClockNodeMsg(vmsg) => 
+                    self.general_process_vc_msg(vmsg)?,
+                PeerNodeMsg::UpdateNodeMsg(umsg)      =>  
+                    {   let vc_status = self.general_process_peer_msg(umsg.clone())?;
+                        if vc_status == VCStatus::INORDER {
+                            self.process_msg(&umsg)?
+                        }
+                    }
             }
         }
         self.causally_stable()?;
@@ -409,7 +424,7 @@ impl CRDT<HashSet<ARSetOpsValue>, ARSetOpsValue, RWSet> {
         match msg.user_update_msg.ops_instance.ops_type {
             SDPOpsType::SDPAdd  =>  {   let clist 
                                             = message_list::concurrent_msg_list(&msg.node_vector_clock, 
-                                                                            &self.msg_list, self.get_option_value(value.clone()))?;
+                                                    &self.msg_list, self.get_option_value(value.clone()))?;
                                         if clist.len() == 0 {
                                             self.crdt_value.insert(value.clone());
                                         };
@@ -444,12 +459,14 @@ impl CRDT<PNCounterData, PNCntOpsValue, PNCounter> {
         Result<HashMap<NodeType, Vec<PeerNodeMsg<PNCntOpsValue>>>, VectorClockError> {
         for msg in pmsg_list {
             match msg {
-                PeerNodeMsg::VectorClockNodeMsg(vmsg) =>    self.general_process_vc_msg(vmsg)?,
-                PeerNodeMsg::UpdateNodeMsg(umsg)      =>    {   let vc_status = self.general_process_peer_msg(umsg.clone())?;
-                                                                                    if vc_status == VCStatus::INORDER {
-                                                                                        self.process_msg(&umsg)?
-                                                                                    }
-                                                                                }
+                PeerNodeMsg::VectorClockNodeMsg(vmsg) =>    
+                    self.general_process_vc_msg(vmsg)?,
+                PeerNodeMsg::UpdateNodeMsg(umsg)      =>    
+                    {   let vc_status = self.general_process_peer_msg(umsg.clone())?;
+                        if vc_status == VCStatus::INORDER {
+                            self.process_msg(&umsg)?
+                        }
+                    }
             }
         }
         self.causally_stable()?;

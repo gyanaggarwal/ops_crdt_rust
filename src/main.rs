@@ -1,3 +1,12 @@
+/*
+1. SDP behavior
+2. anti entropy correctness
+3. vector_clock msg generation
+4. ignore duplicate msg
+5. causally_stable - normal case
+6. causally_stable - node not receiving user update
+7. causally_stable - node receiving vector_clock msg
+*/
 use rand::prelude::*;
 
 use ops_crdt_rust::crdt::{CrdtInstance, CrdtType};
@@ -12,7 +21,7 @@ fn main() {
     let mut ni2 = NodeInstance::new(2).unwrap();
    
     let ops_value = get_rand(1, 20) as i32;
-    let ops_instance = if ops_index == 0 {ni0.get_add_ops(ops_value)} else {ni0.get_mult_ops(ops_value)};
+    let ops_instance = if ops_index == 0 {ni0.get_add_ops_add_mult(ops_value)} else {ni0.get_mult_ops_add_mult(ops_value)};
     let user_update_msg = UserUpdateMsg::new(crdt_instance, ops_instance);
     let result = ni0.process_local_msg(user_update_msg.clone()).unwrap();
 
