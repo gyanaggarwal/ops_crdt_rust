@@ -85,6 +85,13 @@ impl VectorClock {
         Ok(vcords)
     }
 
+    pub fn check_vc(&self, node: NodeType, other: &VectorClock) -> Result<VCOrdering, VectorClockError> {
+        let lc1 = self.vcmap.get(&node).ok_or(VectorClockError::NodeNotFound)?+1;
+        let lc2 = other.vcmap.get(&node).ok_or(VectorClockError::NodeNotFound)?+0;
+
+        Ok(cmp_lc(lc1, lc2))
+    }
+
     pub fn min_max_vc(&self, other: &VectorClock, f: fn(LCType, LCType) -> LCType) -> Result<VectorClock, VectorClockError> {
         let mut vcmap = HashMap::new();
         for (node, lc1) in self.vcmap.iter() {

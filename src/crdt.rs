@@ -131,10 +131,11 @@ impl <CrdtValue: Clone, OpsValue: Clone+PartialEq, State> CRDT<CrdtValue, OpsVal
 
     pub fn general_process_peer_msg(&mut self, msg: NodeUpdateMsg<OpsValue>) -> Result<VCStatus, VectorClockError>  {
         self.msg_count_vc += 1;
-        let vc_ord = self.trcb.node_vector_clock.cmp_vc(&msg.node_vector_clock)?;
+        let vc_ord = self.trcb.node_vector_clock.check_vc(msg.node, &msg.node_vector_clock)?;
         let vc_status = peer_vc_status(vc_ord);
+    
         if vc_status == VCStatus::INORDER {
-            self.max_msg_count_cs += 1;
+            self.msg_count_cs += 1;
             self.add_msg(msg.clone())?;
             self.trcb.add_peer_vc(msg.node, msg.node_vector_clock.clone())?;
         }

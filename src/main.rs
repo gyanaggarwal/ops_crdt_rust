@@ -1,23 +1,38 @@
 use rand::prelude::*;
 
 use ops_crdt_rust::crdt::{CrdtInstance, CrdtType};
-use ops_crdt_rust::node_state::NodeState;
 use ops_crdt_rust::message_data::UserUpdateMsg;
+use ops_crdt_rust::node_instance::NodeInstance;
 
 fn main() {
-    let node_state = NodeState::new().unwrap();
-    let nlen = node_state.get_node_len();
-    let crdt_node = get_crdt_index(nlen);
     let ops_index = get_ops_index();
     let crdt_instance = get_crdt_instance();
-    let node_instance = node_state.get_node_instance(crdt_node);
+    let mut ni0 = NodeInstance::new(0).unwrap();
+    let mut ni1 = NodeInstance::new(1).unwrap();
+    let mut ni2 = NodeInstance::new(2).unwrap();
+   
     let ops_value = get_rand(1, 20) as i32;
-    let ops_instance = if ops_index == 0 {node_instance.get_add_ops(ops_value)} else {node_instance.get_mult_ops(ops_value)};
+    let ops_instance = if ops_index == 0 {ni0.get_add_ops(ops_value)} else {ni0.get_mult_ops(ops_value)};
     let user_update_msg = UserUpdateMsg::new(crdt_instance, ops_instance);
+    let result = ni0.process_local_msg(user_update_msg.clone()).unwrap();
 
-    println!("msg  =>   {:?}", user_update_msg);
-    println!("node =>   {:?}", node_instance);
+    for (pnode, pmsg_list) in result {
+        let _ = match pnode {
+            0 => ni0.process_peer_msg(pmsg_list),
+            1 => ni1.process_peer_msg(pmsg_list),
+            2 => ni2.process_peer_msg(pmsg_list),
+            _ => panic!()};
+     }
+
+    println!("msg    => {:?}", user_update_msg);
+    println!("\n\n");
+    println!("ni0    => {:?}", ni0);
+    println!("\n\n");
+    println!("ni1    => {:?}", ni1);
+    println!("\n\n");
+    println!("ni2    => {:?}", ni2);
 }
+
 
 fn get_crdt_instance() -> CrdtInstance {
     CrdtInstance::new(0, 1, CrdtType::AddMultCrdt)
@@ -25,10 +40,6 @@ fn get_crdt_instance() -> CrdtInstance {
 
 fn get_ops_index() -> u16 {
     get_rand(0,100)%2
-}
-
-fn get_crdt_index(high: u16) -> u16 {
-    get_rand(0, high-1)
 }
 
 fn get_rand(low: u16, high: u16) -> u16 {
