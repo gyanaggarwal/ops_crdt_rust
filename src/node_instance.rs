@@ -173,12 +173,32 @@ impl NodeInstance {
     pub fn get_crdt_instance_pncnt(&self) -> CrdtInstance {
         CrdtInstance::new(0, 1, CrdtType::PNCounterCrdt)
     }
+
+    pub fn query_add_mult(&self) -> IntMultCrdtValue {
+        self.add_mult_crdt.query()
+    }
+
+    pub fn query_ewflag(&self) -> EDFlagCrdtValue {
+        self.ewflag_crdt.query()
+    }
+
+    pub fn query_dwflag(&self) -> EDFlagCrdtValue {
+        self.dwflag_crdt.query()
+    }
+
+    pub fn query_awset(&self) -> HashSet<ARSetOpsValue> {
+        self.awset_crdt.query()
+    }
+
+    pub fn query_rwset(&self) -> HashSet<ARSetOpsValue> {
+        self.rwset_crdt.query()
+    }
+
+    pub fn query_pncnt(&self) -> PNCounterData {
+        self.pncnt_crdt.query()
+    }
 }
 
 pub fn get_rand(low: u16, high: u16) -> u16 {
     rand::thread_rng().gen_range(low..=high)
-}
-
-pub fn do_nothing() -> () {
-    ()
 }

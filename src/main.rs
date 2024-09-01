@@ -8,11 +8,8 @@
 7. causally_stable - node receiving vector_clock msg
 */
 
-use ops_crdt_rust::test_add_mult;
 fn main() {
-    // SDP behavior
-    // causally_stable - normal case
-    test_add_mult::test1();
+    ops_crdt_rust::test_add_mult::test1();
 }
 
 

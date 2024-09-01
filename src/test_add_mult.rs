@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::message_data::UserUpdateMsg;
 use crate::node_instance::{NodeInstance, get_rand};
 
@@ -27,34 +29,37 @@ pub fn test1() {
 
     for (pnode, pmsg_list) in result0 {
         let _ = match pnode {
-            0 => ni0.process_peer_msg_add_mult(pmsg_list),
-            1 => ni1.process_peer_msg_add_mult(pmsg_list),
-            2 => ni2.process_peer_msg_add_mult(pmsg_list),
-            _ => panic!()};
+            0 => ni0.process_peer_msg_add_mult(pmsg_list).unwrap(),
+            1 => ni1.process_peer_msg_add_mult(pmsg_list).unwrap(),
+            2 => ni2.process_peer_msg_add_mult(pmsg_list).unwrap(),
+            _ => HashMap::new()};
     }  
  
     for (pnode, pmsg_list) in result1 {
         let _ = match pnode {
-            0 => ni0.process_peer_msg_add_mult(pmsg_list),
-            1 => ni1.process_peer_msg_add_mult(pmsg_list),
-            2 => ni2.process_peer_msg_add_mult(pmsg_list),
-            _ => panic!()};
+            0 => ni0.process_peer_msg_add_mult(pmsg_list).unwrap(),
+            1 => ni1.process_peer_msg_add_mult(pmsg_list).unwrap(),
+            2 => ni2.process_peer_msg_add_mult(pmsg_list).unwrap(),
+            _ => HashMap::new()};
     }
 
     for (pnode, pmsg_list) in result2 {
         let _ = match pnode {
-            0 => ni0.process_peer_msg_add_mult(pmsg_list),
-            1 => ni1.process_peer_msg_add_mult(pmsg_list),
-            2 => ni2.process_peer_msg_add_mult(pmsg_list),
-            _ => panic!()};
+            0 => ni0.process_peer_msg_add_mult(pmsg_list).unwrap(),
+            1 => ni1.process_peer_msg_add_mult(pmsg_list).unwrap(),
+            2 => ni2.process_peer_msg_add_mult(pmsg_list).unwrap(),
+            _ => HashMap::new()};
     }
 
     println!("\n\nni0 user_update_msg {:?}", user_update_msg0);
+    println!("\nni0 query           {:?}", ni0.query_add_mult());
     println!("\nni0 crdt            {:?}", ni0.add_mult_crdt);
 
     println!("\n\nni1 user_update_msg {:?}", user_update_msg1);
+    println!("\nni1 query           {:?}", ni1.query_add_mult());
     println!("\nni1 crdt            {:?}", ni1.add_mult_crdt);
 
     println!("\n\nni2 user_update_msg {:?}", user_update_msg2);
+    println!("\nni2 query           {:?}", ni2.query_add_mult());
     println!("\nni2 crdt            {:?}", ni2.add_mult_crdt);
 }
