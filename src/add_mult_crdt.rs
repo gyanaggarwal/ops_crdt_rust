@@ -24,7 +24,7 @@ impl CRDT<IntMultCrdtValue, IntMultOpsValue, AddMult> {
                     self.general_process_vc_msg(vmsg)?,
                 PeerNodeMsg::UpdateNodeMsg(umsg)      =>  
                     {   let vc_status = self.general_process_peer_msg(umsg.clone())?;
-                        if vc_status == VCStatus::INORDER {
+                         if vc_status == VCStatus::INORDER {
                             self.process_msg(&umsg)?
                         }
                     }

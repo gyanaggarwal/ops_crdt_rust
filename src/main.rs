@@ -9,7 +9,7 @@
 */
 
 fn main() {
-    ops_crdt_rust::test_add_mult::test1();
+    ops_crdt_rust::test_add_mult::test2();
 }
 
 

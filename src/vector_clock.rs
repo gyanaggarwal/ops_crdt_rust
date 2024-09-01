@@ -25,7 +25,7 @@ pub enum VCOrdering {
     VCCN
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum VCStatus {
     DUPLICATE,
     INORDER,

@@ -63,3 +63,76 @@ pub fn test1() {
     println!("\nni2 query           {:?}", ni2.query_add_mult());
     println!("\nni2 crdt            {:?}", ni2.add_mult_crdt);
 }
+/*
+2. anti entropy correctness
+3. vector_clock msg generation
+4. ignore duplicate msg
+*/
+pub fn test2() {
+    let mut ni0 = NodeInstance::new(0).unwrap();
+    let mut ni1 = NodeInstance::new(1).unwrap();
+    let mut ni2 = NodeInstance::new(2).unwrap();
+
+    let crdt_instance = ni0.get_crdt_instance_add_mult();  
+
+    let ops_value01 = get_rand(1, 20) as i32;
+    let ops_instance01 = ni0.get_add_ops_add_mult(ops_value01);
+    let user_update_msg01 = UserUpdateMsg::new(crdt_instance.clone(), ops_instance01);
+    let result01 = ni0.process_local_msg_add_mult(user_update_msg01.clone()).unwrap();
+
+    let ops_value11 = get_rand(1, 20) as i32;
+    let ops_instance11 = ni1.get_mult_ops_add_mult(ops_value11);
+    let user_update_msg11 = UserUpdateMsg::new(crdt_instance.clone(), ops_instance11);
+    let result11 = ni1.process_local_msg_add_mult(user_update_msg11.clone()).unwrap();
+
+    for (pnode, pmsg_list) in result01 {
+        let _ = match pnode {
+            0 => ni0.process_peer_msg_add_mult(pmsg_list).unwrap(),
+            1 => ni1.process_peer_msg_add_mult(pmsg_list).unwrap(),
+            2 => ni2.process_peer_msg_add_mult(pmsg_list).unwrap(),
+            _ => HashMap::new()};
+    } 
+
+    for (pnode, pmsg_list) in result11 {
+        let _ = match pnode {
+            0 => ni0.process_peer_msg_add_mult(pmsg_list).unwrap(),
+            1 => ni1.process_peer_msg_add_mult(pmsg_list).unwrap(),
+            2 => ni2.process_peer_msg_add_mult(pmsg_list).unwrap(),
+            _ => HashMap::new()};
+    } 
+
+    println!("\nni01 {:?}", ni0.add_mult_crdt);
+    println!("\nni11 {:?}", ni1.add_mult_crdt);
+    println!("\nni21 {:?}", ni2.add_mult_crdt);
+
+    let ops_value02 = get_rand(1, 20) as i32;
+    let ops_instance02 = ni0.get_mult_ops_add_mult(ops_value02);
+    let user_update_msg02 = UserUpdateMsg::new(crdt_instance.clone(), ops_instance02);
+    let result02 = ni0.process_local_msg_add_mult(user_update_msg02.clone()).unwrap();
+
+    for (pnode, pmsg_list) in result02.clone() {
+        let _ = match pnode {
+            0 => ni0.process_peer_msg_add_mult(pmsg_list).unwrap(),
+            1 => ni1.process_peer_msg_add_mult(pmsg_list).unwrap(),
+            2 => HashMap::new(),
+            _ => HashMap::new()};
+    } 
+    let mut vmsg_list = HashMap::new();
+    for (pnode, pmsg_list) in result02 {
+        if pnode == 2 {
+            vmsg_list = ni2.process_peer_msg_add_mult(pmsg_list).unwrap();
+        }
+    }
+
+    for (pnode, pmsg_list) in vmsg_list {
+        let _ = match pnode {
+            0 => ni0.process_peer_msg_add_mult(pmsg_list).unwrap(),
+            1 => ni1.process_peer_msg_add_mult(pmsg_list).unwrap(),
+            2 => ni2.process_peer_msg_add_mult(pmsg_list).unwrap(),
+            _ => HashMap::new()};
+    } 
+    
+    println!("\nni02 {:?}", ni0.add_mult_crdt);
+    println!("\nni12 {:?}", ni1.add_mult_crdt);
+    println!("\nni22 {:?}", ni2.add_mult_crdt);
+}
