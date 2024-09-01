@@ -37,6 +37,8 @@ pub mod pncnt_crdt;
 
 pub mod constants;
 
+pub mod test_add_mult;
+
 
 
 
