@@ -34,6 +34,10 @@ impl CrdtInstance {
     pub fn new(instance_node_id: NodeType, instance_num: CRDTNumType, instance_type: CrdtType) -> Self {
         Self{instance_node_id, instance_num, instance_type}
     }
+
+    pub fn new_default(instance_type: CrdtType) -> Self {
+        Self{instance_node_id:0, instance_num:0, instance_type}
+    }
 }
 
 #[derive(Debug)]
@@ -122,6 +126,10 @@ impl <CrdtValue: Clone, OpsValue: Clone+PartialEq, State> CRDT<CrdtValue, OpsVal
 
     pub fn query(&self) -> CrdtValue {
         self.crdt_value.clone()
+    }
+
+    pub fn msg_list_len(&self) -> usize {
+        self.msg_list.len()
     }
 }
 
