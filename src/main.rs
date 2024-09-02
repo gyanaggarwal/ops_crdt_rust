@@ -6,10 +6,12 @@
 5. causally_stable - normal case
 6. causally_stable - node not receiving user update
 7. causally_stable - node receiving vector_clock msg
+8. Refactor EWFlag, DWFlag
+9. Refactor AWSet, RWSat
 */
 
 fn main() {
-    ops_crdt_rust::test_add_mult::test2();
+    ops_crdt_rust::rand_add_mult::test_random();
 }
 
 

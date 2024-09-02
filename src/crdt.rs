@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt::Debug;
 
 use serde::{Serialize, Deserialize};
 
@@ -41,7 +42,7 @@ impl CrdtInstance {
 }
 
 #[derive(Debug)]
-pub struct CRDT <CrdtValue: Clone, OpsValue: Clone+PartialEq, State> {
+pub struct CRDT <CrdtValue: Clone+Debug, OpsValue: Clone+PartialEq+Debug, State> {
     pub trcb: trcb::TRCBData,
     pub msg_list: HashMap<(NodeType, LCType), NodeUpdateMsg<OpsValue>>,
     pub crdt_value: CrdtValue,
@@ -52,7 +53,7 @@ pub struct CRDT <CrdtValue: Clone, OpsValue: Clone+PartialEq, State> {
     pub state: std::marker::PhantomData<State>
 }
 
-impl <CrdtValue: Clone, OpsValue: Clone+PartialEq, State> CRDT<CrdtValue, OpsValue, State> {
+impl <CrdtValue: Clone+Debug, OpsValue: Clone+PartialEq+Debug, State: Debug> CRDT<CrdtValue, OpsValue, State> {
     pub fn new(node: NodeType, crdt_value: CrdtValue) -> Result<Self, VectorClockError> {
         let trcb = trcb::TRCBData::new(node, NODE_LIST.to_owned().clone())?;
         let msg_list = HashMap::new();
