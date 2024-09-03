@@ -5,7 +5,7 @@ pub fn get_rand(low: u16, high: u16) -> u16 {
     rand::thread_rng().gen_range(low..high)
 }
 
-pub fn get_ops_index() -> bool {
+pub fn get_bool_index() -> bool {
     get_rand(0, 100) % 2 == 0
 }
 

@@ -41,6 +41,8 @@ pub mod rand_crdt;
 
 pub mod rand_add_mult;
 
+pub mod rand_ewflag;
+
 
 
 

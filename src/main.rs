@@ -11,7 +11,8 @@
 */
 
 fn main() {
-    ops_crdt_rust::rand_add_mult::test_random();
+//    ops_crdt_rust::rand_add_mult::test_random();
+    ops_crdt_rust::rand_ewflag::test_random();
 }
 
 
