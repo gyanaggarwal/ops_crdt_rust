@@ -1,4 +1,5 @@
 use std::collections::{HashMap, HashSet};
+use anyhow::Result;
 
 use crate::{NodeType, ARSetOpsValue};
 use crate::crdt::CRDT;

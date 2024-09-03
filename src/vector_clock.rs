@@ -1,20 +1,20 @@
 use std::{cmp::max, cmp::min, collections::HashMap};
 use std::cmp::Ordering;
 use serde::{Serialize, Deserialize};
+use anyhow::Result;
 
 use crate::{LCType, NodeType};
 
 pub const INITIAL_LC: LCType = 0;
 pub const INC_LC:     LCType = 1;
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub enum VectorClockError {
     EmptyNodeList,
     NodeNotFound,
     NonCompatibleVC,
     InconsistentInputTRBC(NodeType, Vec<NodeType>),
-    #[default]
-    UnexpectedError
+    UnexpectedError(String)
 }
 
 #[derive(Debug, Clone, PartialEq)]

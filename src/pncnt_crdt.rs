@@ -1,5 +1,6 @@
 use serde::{Serialize, Deserialize};
 use std::collections::HashMap;
+use anyhow::Result;
 
 use crate::{NodeType, PNCntOpsValue};
 use crate::crdt::CRDT;

@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use anyhow::Result;
 
 use crate::vector_clock::{VectorClock, VectorClockError, VCOrdering};
 use crate::message_data::NodeUpdateMsg;

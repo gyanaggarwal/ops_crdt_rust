@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use anyhow::Result;
 
 use crate::{NodeType, IntMultCrdtValue, IntMultOpsValue};
 use crate::crdt::CRDT;

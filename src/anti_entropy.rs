@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 use std::fmt::Debug;
+use anyhow::Result;
+
 use crate::NodeType;
 use crate::message_data::{PeerNodeMsg, NodeVectorClockMsg};
 use crate::crdt::CRDT;
@@ -23,12 +25,14 @@ impl <CrdtValue: Clone+Debug, OpsValue: Clone+PartialEq+Debug, State: Debug> CRD
                 if msg_flag {
                     for (pvc_node_key, pvc_lc) in pvc.vcmap {
                         if pnode_key != pvc_node_key {
-                            let lc0 = self.trcb.node_vector_clock.vcmap.get(&pvc_node_key).ok_or(VectorClockError::UnexpectedError)?;
+                            let lc0 = 
+                                self.trcb.node_vector_clock.vcmap.get(&pvc_node_key).ok_or(VectorClockError::UnexpectedError("anti_entropy.create_peer_msg_list 29".to_owned()))?;
                             for lc1 in pvc_lc+1..=*lc0 {
                                 let msg_key = (pvc_node_key, lc1);
-                                let msg = self.msg_list.get(&msg_key).ok_or(VectorClockError::UnexpectedError)?;
-                                let msg = msg.clone();
-                                msg_vec1.push(PeerNodeMsg::UpdateNodeMsg(msg));
+                                if let Some(msg) = self.msg_list.get(&msg_key) {
+                                    let msg = msg.clone();
+                                    msg_vec1.push(PeerNodeMsg::UpdateNodeMsg(msg));
+                                }
                             }
                         }
                     }

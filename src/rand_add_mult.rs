@@ -22,15 +22,17 @@ pub fn test_random(){
     let mut ni3 = NodeInstance::new(3).unwrap();
     let mut ni4 = NodeInstance::new(4).unwrap();  
 
-    for _i in 0..msg_count {
+    for i in 0..msg_count {
 
-        let ops_value  = rand_crdt::get_rand(1, 20) as i64;
+        let ops_value  = rand_crdt::get_rand(1, 10) as i64;
         let ops_index = rand_crdt::get_ops_index();
         let node_index = rand_crdt::get_node_index(node_list);
 
         let ops_instance = if ops_index {ni0.add_mult_crdt.get_add_ops(ops_value)} else {ni0.add_mult_crdt.get_mult_ops(ops_value)};
         let user_update_msg = UserUpdateMsg::new(crdt_instance.clone(), ops_instance);
 
+        println!("i {}  msg {:?}", i, user_update_msg);
+        
         let result = match node_index {
             0 => {let node_update_msg = ni0.add_mult_crdt.create_local_msg(user_update_msg).unwrap();
                       ni0.add_mult_crdt.process_local_msg(node_update_msg).unwrap()},
