@@ -43,6 +43,10 @@ pub mod rand_add_mult;
 
 pub mod rand_ewflag;
 
+pub mod rand_awset;
+
+pub mod rand_pncnt;
+
 
 
 

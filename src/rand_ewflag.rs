@@ -22,7 +22,7 @@ pub fn test_random(){
     let mut ni3 = NodeInstance::new(3).unwrap();
     let mut ni4 = NodeInstance::new(4).unwrap();  
 
-    for i in 0..msg_count {
+    for _i in 0..msg_count {
 
         let ops_index = rand_crdt::get_bool_index();
         let node_index = rand_crdt::get_node_index(node_list);
@@ -44,8 +44,6 @@ pub fn test_random(){
             _ => HashMap::new()
         };
 
-//        println!("\n i {} result {:?}", i, result.clone());
-        
         for (pnode, pmsg_list) in result {
             let _ = match pnode {
                 0 => ni0.ewflag_crdt.process_peer_msg(pmsg_list).unwrap(),
@@ -56,22 +54,22 @@ pub fn test_random(){
                 _ => HashMap::new()};
         }  
 
-        println!("\n i {} ni0 node {:?} len {:?} value {:?} trcb {:?}", i, 
-            ni0.ewflag_crdt.get_node(), ni0.ewflag_crdt.msg_list_len(), 
-            ni0.ewflag_crdt.crdt_value, ni0.ewflag_crdt.trcb);
-        println!("\n i {} ni1 node {:?} len {:?} value {:?} trcb {:?}", i, 
-            ni1.ewflag_crdt.get_node(), ni1.ewflag_crdt.msg_list_len(), 
-            ni1.ewflag_crdt.crdt_value, ni1.ewflag_crdt.trcb);
-        println!("\n i {} ni2 node {:?} len {:?} value {:?} trcb {:?}", i, 
-            ni2.ewflag_crdt.get_node(), ni2.ewflag_crdt.msg_list_len(), 
-            ni2.ewflag_crdt.crdt_value, ni2.ewflag_crdt.trcb);
-        println!("\n i {} ni3 node {:?} len {:?} value {:?} trcb {:?}", i, 
-            ni3.ewflag_crdt.get_node(), ni3.ewflag_crdt.msg_list_len(), 
-            ni3.ewflag_crdt.crdt_value, ni3.ewflag_crdt.trcb);
-        println!("\n i {} ni4 node {:?} len {:?} value {:?} trcb {:?}", i,
-            ni4.ewflag_crdt.get_node(), ni4.ewflag_crdt.msg_list_len(), 
-            ni4.ewflag_crdt.crdt_value, ni4.ewflag_crdt.trcb);
-
         rand_crdt::msg_sleep(msg_sleep_time);
     }
+
+    println!("\nni0 node {:?} len {:?} value {:?} trcb {:?}",
+        ni0.ewflag_crdt.get_node(), ni0.ewflag_crdt.msg_list_len(), 
+        ni0.ewflag_crdt.crdt_value, ni0.ewflag_crdt.trcb);
+    println!("\nni1 node {:?} len {:?} value {:?} trcb {:?}",
+        ni1.ewflag_crdt.get_node(), ni1.ewflag_crdt.msg_list_len(), 
+        ni1.ewflag_crdt.crdt_value, ni1.ewflag_crdt.trcb);
+    println!("\nni2 node {:?} len {:?} value {:?} trcb {:?}", 
+        ni2.ewflag_crdt.get_node(), ni2.ewflag_crdt.msg_list_len(), 
+        ni2.ewflag_crdt.crdt_value, ni2.ewflag_crdt.trcb);
+    println!("\nni3 node {:?} len {:?} value {:?} trcb {:?}",
+        ni3.ewflag_crdt.get_node(), ni3.ewflag_crdt.msg_list_len(), 
+        ni3.ewflag_crdt.crdt_value, ni3.ewflag_crdt.trcb);
+    println!("\nni4 node {:?} len {:?} value {:?} trcb {:?}",
+        ni4.ewflag_crdt.get_node(), ni4.ewflag_crdt.msg_list_len(), 
+        ni4.ewflag_crdt.crdt_value, ni4.ewflag_crdt.trcb);
 }
