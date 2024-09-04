@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use dotenvy::dotenv;
 
 use crate::node_instance::NodeInstance;
-use crate::constants::{TEST_MSG_COUNT, TEST_SLEEP_TIME_MS, NODE_LIST};
+use crate::constants::{TEST_MSG_COUNT, TEST_SLEEP_TIME_MS, TEST_MSG_RANGE_PCT, TEST_MSG_RATE_PCT, NODE_LIST};
 use crate::rand_crdt;
 use crate::crdt::{CrdtInstance, CrdtType};
 use crate::message_data::UserUpdateMsg;
@@ -12,6 +12,8 @@ pub fn test_random(){
     dotenv().ok();
     let msg_count = TEST_MSG_COUNT.to_owned();
     let msg_sleep_time = TEST_SLEEP_TIME_MS.to_owned();
+    let msg_range_pct = TEST_MSG_RANGE_PCT.to_owned();
+    let msg_rate_pct = TEST_MSG_RATE_PCT.to_owned();
     let node_list = NODE_LIST.to_owned().len() as u16;
 
     let crdt_instance = CrdtInstance::new_default(CrdtType::AWSetCrdt);
@@ -22,7 +24,7 @@ pub fn test_random(){
     let mut ni3 = NodeInstance::new(3).unwrap();
     let mut ni4 = NodeInstance::new(4).unwrap();  
 
-    for _i in 0..msg_count {
+    for i in 0..msg_count {
 
         let ops_value  = rand_crdt::get_rand(1, 3) as i32;
         let ops_index = rand_crdt::get_bool_index();
@@ -45,29 +47,34 @@ pub fn test_random(){
             _ => HashMap::new()
         };
 
-        let mut vc_result = Vec::new();
-        for (pnode, pmsg_list) in result {
-            let _ = match pnode {
-                0 => vc_result.push(ni0.awset_crdt.process_peer_msg(pmsg_list).unwrap()),
-                1 => vc_result.push(ni1.awset_crdt.process_peer_msg(pmsg_list).unwrap()),
-                2 => vc_result.push(ni2.awset_crdt.process_peer_msg(pmsg_list).unwrap()),
-                3 => vc_result.push(ni3.awset_crdt.process_peer_msg(pmsg_list).unwrap()),
-                4 => vc_result.push(ni4.awset_crdt.process_peer_msg(pmsg_list).unwrap()),
-                _ => vc_result.push(HashMap::new())
-            };
-        }
+        let i100 = i%100;
+        let process_msg = i100 > msg_range_pct || i100 > msg_rate_pct;
 
-        for result in vc_result {
+        if process_msg {
+            let mut vc_result = Vec::new();
             for (pnode, pmsg_list) in result {
                 let _ = match pnode {
-                    0 => ni0.awset_crdt.process_peer_msg(pmsg_list).unwrap(),
-                    1 => ni1.awset_crdt.process_peer_msg(pmsg_list).unwrap(),
-                    2 => ni2.awset_crdt.process_peer_msg(pmsg_list).unwrap(),
-                    3 => ni3.awset_crdt.process_peer_msg(pmsg_list).unwrap(),
-                    4 => ni4.awset_crdt.process_peer_msg(pmsg_list).unwrap(),
-                    _ => HashMap::new()
+                    0 => vc_result.push(ni0.awset_crdt.process_peer_msg(pmsg_list).unwrap()),
+                    1 => vc_result.push(ni1.awset_crdt.process_peer_msg(pmsg_list).unwrap()),
+                    2 => vc_result.push(ni2.awset_crdt.process_peer_msg(pmsg_list).unwrap()),
+                    3 => vc_result.push(ni3.awset_crdt.process_peer_msg(pmsg_list).unwrap()),
+                    4 => vc_result.push(ni4.awset_crdt.process_peer_msg(pmsg_list).unwrap()),
+                    _ => vc_result.push(HashMap::new())
                 };
-            };
+            }
+
+            for result in vc_result {
+                for (pnode, pmsg_list) in result {
+                    let _ = match pnode {
+                        0 => ni0.awset_crdt.process_peer_msg(pmsg_list).unwrap(),
+                        1 => ni1.awset_crdt.process_peer_msg(pmsg_list).unwrap(),
+                        2 => ni2.awset_crdt.process_peer_msg(pmsg_list).unwrap(),
+                        3 => ni3.awset_crdt.process_peer_msg(pmsg_list).unwrap(),
+                        4 => ni4.awset_crdt.process_peer_msg(pmsg_list).unwrap(),
+                        _ => HashMap::new()
+                    };
+                };
+            }
         }
 
         rand_crdt::msg_sleep(msg_sleep_time);
