@@ -110,6 +110,7 @@ impl <CrdtValue: Clone+Debug, OpsValue: Clone+PartialEq+Debug, State: Debug> CRD
         }
         Ok(vc_status)
     }
+
     pub fn general_process_vc_msg(&mut self, msg: NodeVectorClockMsg) -> Result<(), VectorClockError> {
         self.trcb.add_peer_vcmsg(msg.node, msg.node_vector_clock.clone())?;
         self.msg_count_cs += 1;
