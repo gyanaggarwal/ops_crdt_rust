@@ -10,11 +10,12 @@ use crate::message_data::UserUpdateMsg;
 
 pub fn test_random(){
     dotenv().ok();
-    let msg_count = TEST_MSG_COUNT.to_owned();
+    let msg_count      = TEST_MSG_COUNT.to_owned();
     let msg_sleep_time = TEST_SLEEP_TIME_MS.to_owned();
-    let msg_range_pct = TEST_MSG_RANGE_PCT.to_owned();
-    let msg_rate_pct = TEST_MSG_RATE_PCT.to_owned();
-    let node_list = NODE_LIST.to_owned().len() as u16;
+    let msg_range_pct  = TEST_MSG_RANGE_PCT.to_owned();
+    let msg_rate_pct   = TEST_MSG_RATE_PCT.to_owned();
+    let node_list      = NODE_LIST.to_owned().len() as u16;
+    let msg_range      = msg_count*msg_range_pct/100;
 
     let crdt_instance = CrdtInstance::new_default(CrdtType::AWSetCrdt);
 
@@ -48,7 +49,7 @@ pub fn test_random(){
         };
 
         let i100 = i%100;
-        let process_msg = i100 > msg_range_pct || i100 > msg_rate_pct;
+        let process_msg = i > msg_range || i100 > msg_rate_pct;
 
         if process_msg {
             let mut vc_result = Vec::new();
