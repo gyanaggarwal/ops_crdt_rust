@@ -27,7 +27,7 @@ pub fn test_random(){
 
     for i in 0..msg_count {
 
-        let ops_value  = rand_crdt::get_rand(1, 3) as i32;
+        let ops_value  = rand_crdt::get_rand(1, 10) as i32;
         let ops_index = rand_crdt::get_bool_index();
         let node_index = rand_crdt::get_node_index(node_list);
 
@@ -48,8 +48,7 @@ pub fn test_random(){
             _ => HashMap::new()
         };
 
-        let i100 = i%100;
-        let process_msg = i > msg_range || i100 > msg_rate_pct;
+        let process_msg = rand_crdt::progesss_flag(i, msg_count, msg_range, msg_rate_pct);
 
         if process_msg {
             let mut vc_result = Vec::new();
@@ -76,6 +75,8 @@ pub fn test_random(){
                     };
                 };
             }
+        } else {
+            println!("========> msg_num {} progress_flag {}", i, process_msg);
         }
 
         rand_crdt::msg_sleep(msg_sleep_time);

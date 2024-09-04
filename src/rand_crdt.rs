@@ -17,3 +17,7 @@ pub fn msg_sleep(stime: u64) {
     let time_millis = time::Duration::from_millis(stime);
     thread::sleep(time_millis);    
 }
+
+pub fn progesss_flag(msg_num: u16, msg_count: u16, msg_range: u16, msg_rate: u16) -> bool {
+    msg_count - msg_num < 100 || msg_num > msg_range || (msg_num%100) >= msg_rate
+}
