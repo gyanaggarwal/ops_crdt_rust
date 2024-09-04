@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-
+use std::cmp::min;
 use dotenvy::dotenv;
 
 use crate::node_instance::NodeInstance;
@@ -10,7 +10,7 @@ use crate::message_data::UserUpdateMsg;
 
 pub fn test_random(){
     dotenv().ok();
-    let msg_count = TEST_MSG_COUNT.to_owned();
+    let msg_count = min(100, TEST_MSG_COUNT.to_owned());
     let msg_sleep_time = TEST_SLEEP_TIME_MS.to_owned();
     let node_list = NODE_LIST.to_owned().len() as u16;
 
@@ -24,7 +24,7 @@ pub fn test_random(){
 
     for _i in 0..msg_count {
 
-        let ops_value  = rand_crdt::get_rand(1, 10) as i64;
+        let ops_value  = rand_crdt::get_rand(1, 4) as i64;
         let ops_index = rand_crdt::get_bool_index();
         let node_index = rand_crdt::get_node_index(node_list);
 

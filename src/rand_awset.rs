@@ -45,15 +45,30 @@ pub fn test_random(){
             _ => HashMap::new()
         };
 
+        let mut vc_result = Vec::new();
         for (pnode, pmsg_list) in result {
             let _ = match pnode {
-                0 => ni0.awset_crdt.process_peer_msg(pmsg_list).unwrap(),
-                1 => ni1.awset_crdt.process_peer_msg(pmsg_list).unwrap(),
-                2 => ni2.awset_crdt.process_peer_msg(pmsg_list).unwrap(),
-                3 => ni3.awset_crdt.process_peer_msg(pmsg_list).unwrap(),
-                4 => ni4.awset_crdt.process_peer_msg(pmsg_list).unwrap(),
-                _ => HashMap::new()};
-        }  
+                0 => vc_result.push(ni0.awset_crdt.process_peer_msg(pmsg_list).unwrap()),
+                1 => vc_result.push(ni1.awset_crdt.process_peer_msg(pmsg_list).unwrap()),
+                2 => vc_result.push(ni2.awset_crdt.process_peer_msg(pmsg_list).unwrap()),
+                3 => vc_result.push(ni3.awset_crdt.process_peer_msg(pmsg_list).unwrap()),
+                4 => vc_result.push(ni4.awset_crdt.process_peer_msg(pmsg_list).unwrap()),
+                _ => vc_result.push(HashMap::new())
+            };
+        }
+
+        for result in vc_result {
+            for (pnode, pmsg_list) in result {
+                let _ = match pnode {
+                    0 => ni0.awset_crdt.process_peer_msg(pmsg_list).unwrap(),
+                    1 => ni1.awset_crdt.process_peer_msg(pmsg_list).unwrap(),
+                    2 => ni2.awset_crdt.process_peer_msg(pmsg_list).unwrap(),
+                    3 => ni3.awset_crdt.process_peer_msg(pmsg_list).unwrap(),
+                    4 => ni4.awset_crdt.process_peer_msg(pmsg_list).unwrap(),
+                    _ => HashMap::new()
+                };
+            };
+        }
 
         rand_crdt::msg_sleep(msg_sleep_time);
     }
